@@ -3,17 +3,15 @@ from flask import redirect, url_for, flash
 from flask_login import current_user
 from datetime import datetime, timedelta
 
-from app.models import Session
-
 
 # =====================================================
-# PROFILE CHECK
+# PROFILE REQUIRED
 # =====================================================
 def profile_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_user.is_authenticated and not current_user.profile_completed:
-            flash("Complete your profile first.", "warning")
+            flash("Complete your profile first", "warning")
             return redirect(url_for("profile.edit"))
         return f(*args, **kwargs)
     return decorated_function
@@ -23,85 +21,40 @@ def profile_required(f):
 # USER AVAILABILITY FORMATTER
 # =====================================================
 def get_user_availability(user):
-    return [
-        {
-            "day_of_week": a.day_of_week,
-            "start": a.start_time.strftime("%H:%M"),
-            "end": a.end_time.strftime("%H:%M")
+    availability = {}
+
+    for av in user.availability:
+        availability[av.day_of_week] = {
+            "start": av.start_time.strftime("%H:%M"),
+            "end": av.end_time.strftime("%H:%M")
         }
-        for a in user.availability
-    ]
+
+    return availability
 
 
 # =====================================================
-# CHECK TIME SLOT INSIDE AVAILABILITY
-# =====================================================
-def check_time_availability(user, date, start_time, duration_minutes):
-    day = date.weekday()
-
-    slot = next((a for a in user.availability if a.day_of_week == day), None)
-
-    if not slot:
-        return False, "Not available on this day"
-
-    try:
-        start = datetime.strptime(start_time, "%H:%M").time()
-    except ValueError:
-        return False, "Invalid time format"
-
-    end = (datetime.combine(date, start) + timedelta(minutes=duration_minutes)).time()
-
-    if start < slot.start_time or end > slot.end_time:
-        return False, "Outside availability"
-
-    return True, "OK"
-
-
-# =====================================================
-# BOOKING CONFLICT CHECK
-# =====================================================
-def check_booking_conflicts(user_id, date, start_time, duration_minutes):
-    try:
-        start_dt = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
-    except ValueError:
-        return False, "Invalid datetime"
-
-    end_dt = start_dt + timedelta(minutes=duration_minutes)
-
-    conflict = Session.query.filter(
-        ((Session.requester_id == user_id) | (Session.provider_id == user_id)),
-        Session.status.in_(["pending", "accepted"]),
-        Session.scheduled_start < end_dt,
-        Session.scheduled_end > start_dt
-    ).first()
-
-    if conflict:
-        return False, "Conflicting session exists"
-
-    return True, "OK"
-
-
-# =====================================================
-# BUSY SLOTS (FIXED - NO IMPORT ERROR)
+# BUSY SLOTS (RETURN OBJECTS - FIX FOR TEMPLATE)
 # =====================================================
 def get_user_busy_slots(user_id, date):
+    from app.models import Session
+
     sessions = Session.query.filter(
-        ((Session.requester_id == user_id) | (Session.provider_id == user_id)),
+        (Session.requester_id == user_id) |
+        (Session.provider_id == user_id),
         Session.status.in_(["pending", "accepted"])
     ).all()
 
-    return [
-        {
-            "start": s.scheduled_start.time(),
-            "end": s.scheduled_end.time()
-        }
-        for s in sessions
-        if s.scheduled_start and s.scheduled_start.date() == date
-    ]
+    busy = []
+
+    for s in sessions:
+        if s.scheduled_start and s.scheduled_start.date() == date:
+            busy.append(s)
+
+    return busy
 
 
 # =====================================================
-# COMMON SLOTS (THIS FIXES YOUR UI FEATURE)
+# COMMON AVAILABILITY (FIXED)
 # =====================================================
 def get_common_availability(user1, user2):
     common = []
@@ -125,10 +78,61 @@ def get_common_availability(user1, user2):
 
 
 # =====================================================
-# CREDIT SYSTEM
+# TIME CHECK
+# =====================================================
+def check_time_availability(user, date, start_time, duration_minutes):
+    day = date.weekday()
+
+    slot = next((a for a in user.availability if a.day_of_week == day), None)
+
+    if not slot:
+        return False, "No availability"
+
+    try:
+        start = datetime.strptime(start_time, "%H:%M").time()
+    except:
+        return False, "Invalid time"
+
+    end = (datetime.combine(date, start) + timedelta(minutes=duration_minutes)).time()
+
+    if start < slot.start_time or end > slot.end_time:
+        return False, "Outside available hours"
+
+    return True, "OK"
+
+
+# =====================================================
+# BOOKING CONFLICT
+# =====================================================
+def check_booking_conflicts(user_id, date, start_time, duration_minutes):
+    from app.models import Session
+
+    try:
+        start_dt = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+    except:
+        return False, "Invalid datetime"
+
+    end_dt = start_dt + timedelta(minutes=duration_minutes)
+
+    conflict = Session.query.filter(
+        (Session.requester_id == user_id) |
+        (Session.provider_id == user_id),
+        Session.status.in_(["pending", "accepted"]),
+        Session.scheduled_start < end_dt,
+        Session.scheduled_end > start_dt
+    ).first()
+
+    if conflict:
+        return False, "Conflicting session exists"
+
+    return True, "OK"
+
+
+# =====================================================
+# CREDIT RATES
 # =====================================================
 CREDIT_RATES = {
-    "30": {"minutes": 30, "credits": 25},
-    "60": {"minutes": 60, "credits": 50},
-    "120": {"minutes": 120, "credits": 100}
+    "30": 25,
+    "60": 50,
+    "120": 100
 }
