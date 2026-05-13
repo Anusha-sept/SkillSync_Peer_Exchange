@@ -5,30 +5,48 @@ from datetime import datetime, timedelta
 from app import db
 from app.models import User, Skill, Session
 
+from app.utils.agora import (
+    create_meeting_channel,
+    get_session_duration_minutes,
+    calculate_credits
+)
+
+from app.utils.email import (
+    send_exchange_request_email,
+    send_request_confirmation_email,
+    create_notification
+)
+
 from app.utils.helpers import (
     profile_required,
     check_time_availability,
     check_booking_conflicts,
-    CREDIT_RATES,
     get_user_busy_slots,
     get_common_availability
 )
 
-sessions_bp = Blueprint('sessions', __name__)
+
+sessions_bp = Blueprint("sessions", __name__)
 
 
-# ---------------- CREATE REQUEST ----------------
-@sessions_bp.route('/create/<int:user_id>', methods=['GET', 'POST'])
+# =====================================================
+# CREATE SESSION REQUEST
+# =====================================================
+@sessions_bp.route("/create/<int:user_id>", methods=["GET", "POST"])
 @login_required
 @profile_required
 def create_request(user_id):
 
     if user_id == current_user.id:
-        flash("You cannot request yourself", "danger")
+        flash("Cannot request yourself", "danger")
         return redirect(url_for("main.matches"))
 
     provider = User.query.get_or_404(user_id)
-    skills = Skill.query.all()
+
+    common_slots = get_common_availability(current_user, provider)
+
+    provider_busy = get_user_busy_slots(provider.id, datetime.utcnow().date())
+    user_busy = get_user_busy_slots(current_user.id, datetime.utcnow().date())
 
     if request.method == "POST":
 
@@ -42,31 +60,24 @@ def create_request(user_id):
             flash("Fill all fields", "danger")
             return redirect(request.url)
 
-        duration_minutes = int(duration)
+        start_dt = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
 
-        try:
-            scheduled_start = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
-        except:
-            flash("Invalid date/time", "danger")
-            return redirect(request.url)
+        duration_minutes = get_session_duration_minutes(duration)
+        credits = calculate_credits(duration_minutes)
 
-        if scheduled_start <= datetime.utcnow():
-            flash("Select future time", "danger")
-            return redirect(request.url)
+        end_dt = start_dt + timedelta(minutes=duration_minutes)
 
-        scheduled_end = scheduled_start + timedelta(minutes=duration_minutes)
+        if current_user.credits < credits:
+            flash("Not enough credits", "danger")
+            return redirect(url_for("wallet.index"))
 
-        can_book, msg = check_booking_conflicts(
-            current_user.id, scheduled_start.date(), time, duration_minutes
-        )
-        if not can_book:
+        ok, msg = check_booking_conflicts(current_user.id, start_dt.date(), time, duration_minutes)
+        if not ok:
             flash(msg, "danger")
             return redirect(request.url)
 
-        can_book, msg = check_booking_conflicts(
-            provider.id, scheduled_start.date(), time, duration_minutes
-        )
-        if not can_book:
+        ok, msg = check_booking_conflicts(provider.id, start_dt.date(), time, duration_minutes)
+        if not ok:
             flash(msg, "danger")
             return redirect(request.url)
 
@@ -75,47 +86,40 @@ def create_request(user_id):
             provider_id=provider.id,
             requester_skill_id=your_skill_id,
             provider_skill_id=skill_id,
-            scheduled_start=scheduled_start,
-            scheduled_end=scheduled_end,
+            scheduled_start=start_dt,
+            scheduled_end=end_dt,
             duration_minutes=duration_minutes,
-            credits_amount=CREDIT_RATES[str(duration)]["credits"],
-            status="pending"
+            credits_amount=credits,
+            agora_channel=create_meeting_channel(0)
         )
 
         db.session.add(session)
         db.session.commit()
 
+        session.agora_channel = create_meeting_channel(session.id)
+        db.session.commit()
+
+        send_exchange_request_email(session)
+        send_request_confirmation_email(session)
+
+        create_notification(
+            provider,
+            "New Request",
+            f"{current_user.first_name} sent you a request",
+            "exchange_request",
+            "/sessions/requests"
+        )
+
         flash("Request sent!", "success")
         return redirect(url_for("sessions.my_sessions"))
-
-    # ---------------- GET ----------------
-    today = datetime.utcnow().date()
-
-    user_busy = get_user_busy_slots(current_user.id, today)
-    provider_busy = get_user_busy_slots(provider.id, today)
-    common_slots = get_common_availability(current_user, provider)
 
     min_date = (datetime.utcnow() + timedelta(days=1)).strftime("%Y-%m-%d")
 
     return render_template(
         "sessions/create.html",
         provider=provider,
-        skills=skills,
-        user_busy=user_busy,
+        min_date=min_date,
         provider_busy=provider_busy,
-        common_slots=common_slots,
-        min_date=min_date
+        user_busy=user_busy,
+        common_slots=common_slots
     )
-
-
-# ---------------- OTHER ROUTES ----------------
-@sessions_bp.route("/my")
-@login_required
-def my_sessions():
-
-    sessions = Session.query.filter(
-        (Session.requester_id == current_user.id) |
-        (Session.provider_id == current_user.id)
-    ).all()
-
-    return render_template("sessions/my_sessions.html", sessions=sessions)
