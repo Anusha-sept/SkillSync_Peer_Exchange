@@ -11,6 +11,7 @@
         <div class="flex items-center space-x-4 mb-6">
             <img src="{{ url_for('static', filename='uploads/' + provider.avatar) }}"
                  class="w-16 h-16 rounded-full object-cover">
+
             <div>
                 <h2 class="text-xl font-bold">
                     Request Exchange with {{ provider.full_name }}
@@ -19,15 +20,43 @@
             </div>
         </div>
 
-        <!-- AVAILABILITY -->
+        <!-- ===================================================== -->
+        <!-- COMMON AVAILABILITY -->
+        <!-- ===================================================== -->
+        <div class="glass p-4 rounded-xl mb-6">
+
+            <h3 class="text-yellow-400 font-semibold mb-2">
+                🔥 Best Matching Slots
+            </h3>
+
+            {% if common_slots and common_slots|length > 0 %}
+                {% for slot in common_slots %}
+                    <div class="text-sm text-gray-300 mb-1">
+                        📅 Day {{ slot.day_of_week }} :
+                        ⏰ {{ slot.start }} - {{ slot.end }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-400 text-sm">
+                    No overlapping availability found
+                </p>
+            {% endif %}
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- BUSY SLOTS -->
+        <!-- ===================================================== -->
         <div class="grid grid-cols-2 gap-4 mb-6">
 
+            <!-- USER -->
             <div class="glass p-4 rounded-xl">
                 <h3 class="text-green-400 font-semibold mb-2">Your Busy Slots</h3>
-                {% if user_busy %}
-                    {% for start, end in user_busy %}
+
+                {% if user_busy and user_busy|length > 0 %}
+                    {% for slot in user_busy %}
                         <p class="text-sm text-gray-300">
-                            ⛔ {{ start.strftime('%H:%M') }} - {{ end.strftime('%H:%M') }}
+                            ⛔ {{ slot.start.strftime('%H:%M') }} - {{ slot.end.strftime('%H:%M') }}
                         </p>
                     {% endfor %}
                 {% else %}
@@ -35,12 +64,14 @@
                 {% endif %}
             </div>
 
+            <!-- PROVIDER -->
             <div class="glass p-4 rounded-xl">
                 <h3 class="text-purple-400 font-semibold mb-2">Provider Busy Slots</h3>
-                {% if provider_busy %}
-                    {% for start, end in provider_busy %}
+
+                {% if provider_busy and provider_busy|length > 0 %}
+                    {% for slot in provider_busy %}
                         <p class="text-sm text-gray-300">
-                            ⛔ {{ start.strftime('%H:%M') }} - {{ end.strftime('%H:%M') }}
+                            ⛔ {{ slot.start.strftime('%H:%M') }} - {{ slot.end.strftime('%H:%M') }}
                         </p>
                     {% endfor %}
                 {% else %}
@@ -50,38 +81,56 @@
 
         </div>
 
+        <!-- ===================================================== -->
         <!-- FORM -->
+        <!-- ===================================================== -->
         <form method="POST">
 
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
             <div class="space-y-5">
 
-                <!-- SKILL -->
+                <!-- LEARN SKILL -->
                 <div>
                     <label class="text-sm font-medium">Learn Skill</label>
-                    <select name="skill_id" class="input-field w-full p-3 rounded-xl" required>
+                    <select name="skill_id"
+                            class="input-field w-full p-3 rounded-xl"
+                            required>
+
                         <option value="">Select skill</option>
+
                         {% for skill in provider.offered_skills %}
-                            <option value="{{ skill.id }}">{{ skill.name }}</option>
+                            <option value="{{ skill.id }}">
+                                {{ skill.name }}
+                            </option>
                         {% endfor %}
+
                     </select>
                 </div>
 
-                <!-- YOUR SKILL -->
+                <!-- TEACH SKILL -->
                 <div>
                     <label class="text-sm font-medium">Teach Skill</label>
-                    <select name="your_skill_id" class="input-field w-full p-3 rounded-xl" required>
+
+                    <select name="your_skill_id"
+                            class="input-field w-full p-3 rounded-xl"
+                            required>
+
                         <option value="">Select skill</option>
+
                         {% for skill in current_user.offered_skills %}
-                            <option value="{{ skill.id }}">{{ skill.name }}</option>
+                            <option value="{{ skill.id }}">
+                                {{ skill.name }}
+                            </option>
                         {% endfor %}
+
                     </select>
                 </div>
 
                 <!-- DURATION -->
                 <div>
                     <label class="text-sm font-medium">Duration</label>
+
                     <div class="grid grid-cols-3 gap-3 mt-2">
 
                         <label class="glass p-3 rounded-xl text-center cursor-pointer">
@@ -102,22 +151,28 @@
                     </div>
                 </div>
 
-                <!-- DATE TIME -->
+                <!-- DATE + TIME -->
                 <div class="grid grid-cols-2 gap-4">
 
-                    <input type="date" name="date"
+                    <input type="date"
+                           name="date"
                            min="{{ min_date }}"
-                           class="input-field p-3 rounded-xl" required>
+                           class="input-field p-3 rounded-xl"
+                           required>
 
-                    <input type="time" name="time"
-                           class="input-field p-3 rounded-xl" required>
+                    <input type="time"
+                           name="time"
+                           class="input-field p-3 rounded-xl"
+                           required>
 
                 </div>
 
-                <!-- BALANCE -->
+                <!-- CREDITS -->
                 <div class="bg-indigo-500/20 p-4 rounded-xl">
                     <p>Your credits: <b>{{ current_user.credits }}</b></p>
-                    <p class="text-sm text-gray-400">Deducted after acceptance</p>
+                    <p class="text-sm text-gray-400">
+                        Deducted only after acceptance
+                    </p>
                 </div>
 
                 <!-- BUTTONS -->
