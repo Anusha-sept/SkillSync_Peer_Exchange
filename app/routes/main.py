@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import User, Skill, Session, Notification, WalletTransaction, Certificate
 from datetime import datetime, timedelta
-from app.utils.helpers import profile_required, get_user_availability
+from app.utils.helpers import profile_required
 
 main_bp = Blueprint('main', __name__)
 
