@@ -5,7 +5,7 @@ Flask-Mail==0.10.0
 Flask-WTF==1.2.1
 Flask-Migrate==4.0.5
 Flask-Bcrypt==1.0.1
-SQLAlchemy==2.0.23
+SQLAlchemy==2.0.41
 psycopg2-binary==2.9.9
 gunicorn==21.2.0
 APScheduler==3.10.4
