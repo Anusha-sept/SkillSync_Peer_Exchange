@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
-from app import db
+from app import db, csrf
 from app.models import User, Skill, Session, Notification
 from datetime import datetime, timedelta
 
@@ -73,6 +73,7 @@ def check_session_status(session_id):
 
 @api_bp.route('/update-online-status', methods=['POST'])
 @login_required
+@csrf.exempt
 def update_online_status():
     current_user.is_online = request.json.get('is_online', True)
     db.session.commit()
