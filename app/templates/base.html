@@ -4,388 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SkillSync Nexus{% endblock %}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --accent: #ec4899;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #1e293b;
-            --light: #f8fafc;
-        }
-        
+        * { font-family: 'Inter', sans-serif; }
+
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
             min-height: 100vh;
+            color: white;
         }
-        
+
         .glass {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        
-        .glass-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            transition: all 0.3s ease;
+
+        .nav-link {
+            padding: 8px 12px;
+            border-radius: 10px;
         }
-        
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
         }
-        
+
         .gradient-text {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            background: linear-gradient(135deg,#6366f1,#ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .btn-gradient {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-gradient:hover {
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-        }
-        
-        .input-field {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .input-field:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-        
-        .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .sidebar-link {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-        }
-        
-        .sidebar-link:hover, .sidebar-link.active {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
-        }
-        
-        .notification-badge {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease forwards;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-slide-up {
-            animation: slideUp 0.6s ease forwards;
-        }
-        
-        .nav-link {
-            position: relative;
-        }
-        
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #6366f1, #ec4899);
-            transition: width 0.3s ease;
-        }
-        
-        .nav-link:hover::after {
-            width: 100%;
-        }
-        
-        .skill-tag {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-        
-        .rating-star {
-            color: #f59e0b;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        
-        .status-online { background: #10b981; box-shadow: 0 0 10px #10b981; }
-        .status-offline { background: #64748b; }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loader {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            padding: 16px 24px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .toast-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .toast-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-        .toast-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .toast-info { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
-        
-        .session-card {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .session-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-menu { display: none; }
-            .mobile-menu.active { display: block; }
         }
     </style>
+
     {% block extra_css %}{% endblock %}
 </head>
-<body class="text-white">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="toast toast-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    {% if current_user.is_authenticated %}
-        <nav class="glass sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex items-center">
-                        <a href="{{ url_for('main.dashboard') }}" class="flex items-center space-x-2">
-                            <i class="fas fa-sync-alt text-2xl gradient-text"></i>
-                            <span class="font-bold text-xl gradient-text">SkillSync Nexus</span>
-                        </a>
-                    </div>
-                    
-                    <div class="hidden md:flex items-center space-x-1">
-                        <a href="{{ url_for('main.dashboard') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/10">Dashboard</a>
-                        <a href="{{ url_for('main.matches') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/10">AI Matches</a>
-                        <a href="{{ url_for('sessions.my_sessions') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/10">Sessions</a>
-                        <a href="{{ url_for('main.explore') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/10">Explore</a>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button id="notificationBtn" class="p-2 rounded-full hover:bg-white/10 relative">
-                                <i class="fas fa-bell text-lg"></i>
-                                {% set unread_count = current_user.notifications.filter_by(is_read=False).count() %}
-                                {% if unread_count > 0 %}
-                                    <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{{ unread_count }}</span>
-                                {% endif %}
-                            </button>
-                            <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 glass-card rounded-xl shadow-xl">
-                                <div class="p-4 border-b border-white/10">
-                                    <h3 class="font-semibold">Notifications</h3>
-                                </div>
-                                <div class="max-h-80 overflow-y-auto" id="notificationList">
-                                    {% set recent_notifications = g.notifications_menu if g else [] %}
-                                    {% if recent_notifications %}
-                                        {% for notif in recent_notifications %}
-                                            <a href="{{ url_for('main.mark_notification_read', notification_id=notif.id) }}" class="block p-4 hover:bg-white/5 border-b border-white/5 {% if not notif.is_read %}bg-indigo-500/10{% endif %}">
-                                                <p class="text-sm font-medium">{{ notif.title }}</p>
-                                                <p class="text-xs text-gray-400 mt-1">{{ notif.message }}</p>
-                                                <p class="text-xs text-gray-500 mt-1">{{ notif.created_at.strftime('%b %d, %H:%M') }}</p>
-                                            </a>
-                                        {% endfor %}
-                                    {% else %}
-                                        <p class="p-4 text-center text-gray-400">No notifications</p>
-                                    {% endif %}
-                                </div>
-                                <div class="p-3 border-t border-white/10">
-                                    <a href="{{ url_for('main.notifications') }}" class="text-sm text-indigo-400 hover:text-indigo-300">View all notifications</a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-3 cursor-pointer" id="userMenuBtn">
-                            <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" alt="Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500">
-                            <div class="hidden sm:block">
-                                <p class="text-sm font-medium">{{ current_user.first_name }}</p>
-                                <p class="text-xs text-gray-400">{{ current_user.credits }} credits</p>
-                            </div>
-                        </div>
-                        <div id="userDropdown" class="hidden absolute right-0 mt-48 mr-4 w-48 glass-card rounded-xl shadow-xl py-2">
-                            <a href="{{ url_for('profile.view', username=current_user.username) }}" class="block px-4 py-2 hover:bg-white/10"><i class="fas fa-user mr-2"></i>Profile</a>
-                            <a href="{{ url_for('wallet.index') }}" class="block px-4 py-2 hover:bg-white/10"><i class="fas fa-wallet mr-2"></i>Wallet</a>
-                            <a href="{{ url_for('profile.edit') }}" class="block px-4 py-2 hover:bg-white/10"><i class="fas fa-cog mr-2"></i>Settings</a>
-                            {% if current_user.is_admin %}
-                            <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-2 hover:bg-white/10"><i class="fas fa-shield-alt mr-2"></i>Admin</a>
-                            {% endif %}
-                            <hr class="my-2 border-white/10">
-                            <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 hover:bg-white/10 text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    {% endif %}
-    
-    <main class="min-h-screen">
-        {% block content %}{% endblock %}
-    </main>
-    
-    {% if current_user.is_authenticated %}
-        <footer class="glass mt-20">
-            <div class="max-w-7xl mx-auto py-8 px-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
-                        <i class="fas fa-sync-alt text-xl gradient-text"></i>
-                        <span class="font-bold gradient-text">SkillSync Nexus</span>
-                    </div>
-                    <p class="text-gray-400 text-sm">© 2024 SkillSync Nexus. All rights reserved.</p>
-                    <div class="flex space-x-4 mt-4 md:mt-0">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-github"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin"></i></a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    {% endif %}
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(toast => {
-                setTimeout(() => {
-                    toast.style.animation = 'slideIn 0.3s ease reverse';
-                    setTimeout(() => toast.remove(), 300);
-                }, 4000);
-            });
-            
-            const notifBtn = document.getElementById('notificationBtn');
-            const notifDropdown = document.getElementById('notificationDropdown');
-            if (notifBtn && notifDropdown) {
-                notifBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    notifDropdown.classList.toggle('hidden');
-                });
-            }
-            
-            const userMenuBtn = document.getElementById('userMenuBtn');
-            const userDropdown = document.getElementById('userDropdown');
-            if (userMenuBtn && userDropdown) {
-                userMenuBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('hidden');
-                });
-            }
-            
-            document.addEventListener('click', function(e) {
-                if (notifDropdown && !notifDropdown.contains(e.target) && e.target !== notifBtn) {
-                    notifDropdown.classList.add('hidden');
-                }
-                if (userDropdown && !userDropdown.contains(e.target) && e.target !== userMenuBtn) {
-                    userDropdown.classList.add('hidden');
-                }
-            });
-            
-            window.updateOnlineStatus = function(isOnline) {
-                fetch('/api/update-online-status', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({is_online: isOnline})
-                });
-            };
-            
-            setInterval(() => window.updateOnlineStatus(true), 30000);
-            window.addEventListener('beforeunload', () => window.updateOnlineStatus(false));
-        });
-        
-        function showAlert(type, title, message) {
-            Swal.fire({ icon: type, title, text: message, confirmButtonColor: '#6366f1' });
-        }
-        
-        function confirmAction(title, text, confirmText = 'Yes', cancelText = 'Cancel') {
-            return Swal.fire({
-                title, text, icon: 'warning', showCancelButton: true,
-                confirmButtonColor: '#6366f1', cancelButtonColor: '#ef4444',
-                confirmButtonText: confirmText, cancelButtonText: cancelText
-            });
-        }
-    </script>
-    {% block extra_js %}{% endblock %}
+
+<body>
+
+<!-- =====================================================
+NAVBAR
+===================================================== -->
+{% if current_user.is_authenticated %}
+
+<nav class="glass flex justify-between items-center px-6 py-4">
+
+    <!-- LOGO -->
+    <a href="{{ url_for('main.dashboard') }}" class="text-xl font-bold gradient-text">
+        SkillSync Nexus
+    </a>
+
+    <!-- LINKS -->
+    <div class="flex gap-2">
+
+        <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+
+        <a class="nav-link" href="{{ url_for('main.matches') }}">Matches</a>
+
+        <!-- FIXED: sessions route exists now -->
+        <a class="nav-link" href="{{ url_for('sessions.my_sessions') }}">Sessions</a>
+
+        <a class="nav-link" href="{{ url_for('main.explore') }}">Explore</a>
+
+    </div>
+
+    <!-- USER -->
+    <div class="flex items-center gap-3">
+
+        <span class="text-sm">
+            {{ current_user.first_name }}
+        </span>
+
+        <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}"
+             class="w-9 h-9 rounded-full">
+
+    </div>
+
+</nav>
+
+{% endif %}
+
+<!-- =====================================================
+PAGE CONTENT
+===================================================== -->
+<main class="p-4">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- =====================================================
+FLASH ALERTS
+===================================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const toasts = document.querySelectorAll(".toast");
+    toasts.forEach(t => {
+        setTimeout(() => t.remove(), 4000);
+    });
+});
+
+function showAlert(type, title, msg) {
+    Swal.fire({ icon: type, title: title, text: msg });
+}
+</script>
+
+{% block extra_js %}{% endblock %}
+
 </body>
 </html>
