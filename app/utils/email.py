@@ -18,10 +18,27 @@ def send_async_email(app, msg):
 
 
 def send_email(subject, recipients, html_body, text_body=None):
-    # Disable email for local development (Gmail SSL issues)
-    # Emails work on production with proper SMTP
-    logger.info(f"Email (disabled locally): {subject} to {recipients}")
-    return
+    from flask import current_app
+
+    if not isinstance(recipients, list):
+        recipients = [recipients]
+
+    msg = Message(subject, recipients=recipients, html=html_body, body=text_body)
+
+    # Keep local development from crashing on SMTP/SSL issues.
+    if current_app.config.get('DEBUG'):
+        try:
+            mail.send(msg)
+            logger.info(f"Email sent in debug mode: {msg.subject}")
+        except Exception as e:
+            logger.warning(f"Email skipped in debug mode: {e}")
+        return
+
+    Thread(
+        target=send_async_email,
+        args=(current_app._get_current_object(), msg),
+        daemon=True,
+    ).start()
 
 
 def send_welcome_email(user):
