@@ -1,10 +1,10 @@
-import multiprocessing
+import os
 
-bind = "0.0.0.0:8000"
-workers = multiprocessing.cpu_count() * 2 + 1
+bind = f"0.0.0.0:{os.environ.get('PORT', '10000')}"
+workers = int(os.environ.get('WEB_CONCURRENCY', '1'))
 worker_class = "sync"
 worker_connections = 1000
-timeout = 120
+timeout = 180
 keepalive = 5
 
 max_requests = 1000
@@ -14,4 +14,4 @@ accesslog = "-"
 errorlog = "-"
 loglevel = "info"
 
-preload_app = True
+preload_app = False

@@ -117,7 +117,9 @@ def create_app(config_name=None):
                 db.session.add(skill)
         db.session.commit()
         
-        from app.utils.scheduler import init_scheduler
-        init_scheduler(app)
+        # Avoid running APScheduler inside Render web workers.
+        if os.environ.get('ENABLE_SCHEDULER', 'false').lower() == 'true':
+            from app.utils.scheduler import init_scheduler
+            init_scheduler(app)
     
     return app
