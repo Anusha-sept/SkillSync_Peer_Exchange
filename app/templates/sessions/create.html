@@ -3,98 +3,141 @@
 {% block title %}Request Exchange - SkillSync Nexus{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-2xl mx-auto px-4 py-8">
+
     <div class="glass-card p-8">
-        <div class="flex items-center space-x-4 mb-8">
-            <img src="{{ url_for('static', filename='uploads/' + provider.avatar) }}" class="w-16 h-16 rounded-full object-cover ring-2 ring-indigo-500">
+
+        <!-- HEADER -->
+        <div class="flex items-center space-x-4 mb-6">
+            <img src="{{ url_for('static', filename='uploads/' + provider.avatar) }}"
+                 class="w-16 h-16 rounded-full object-cover">
             <div>
-                <h2 class="text-xl font-bold">Request Exchange with {{ provider.full_name }}</h2>
+                <h2 class="text-xl font-bold">
+                    Request Exchange with {{ provider.full_name }}
+                </h2>
                 <p class="text-gray-400">@{{ provider.username }}</p>
             </div>
         </div>
-        
+
+        <!-- AVAILABILITY -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+
+            <div class="glass p-4 rounded-xl">
+                <h3 class="text-green-400 font-semibold mb-2">Your Busy Slots</h3>
+                {% if user_busy %}
+                    {% for start, end in user_busy %}
+                        <p class="text-sm text-gray-300">
+                            ⛔ {{ start.strftime('%H:%M') }} - {{ end.strftime('%H:%M') }}
+                        </p>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-green-300 text-sm">Fully available 🎉</p>
+                {% endif %}
+            </div>
+
+            <div class="glass p-4 rounded-xl">
+                <h3 class="text-purple-400 font-semibold mb-2">Provider Busy Slots</h3>
+                {% if provider_busy %}
+                    {% for start, end in provider_busy %}
+                        <p class="text-sm text-gray-300">
+                            ⛔ {{ start.strftime('%H:%M') }} - {{ end.strftime('%H:%M') }}
+                        </p>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-purple-300 text-sm">Fully available 🎉</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- FORM -->
         <form method="POST">
+
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="space-y-6">
+
+            <div class="space-y-5">
+
+                <!-- SKILL -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">What skill do you want to learn?</label>
-                    <select name="skill_id" class="input-field w-full px-4 py-3 rounded-xl" required>
-                        <option value="">Select a skill</option>
+                    <label class="text-sm font-medium">Learn Skill</label>
+                    <select name="skill_id" class="input-field w-full p-3 rounded-xl" required>
+                        <option value="">Select skill</option>
                         {% for skill in provider.offered_skills %}
                             <option value="{{ skill.id }}">{{ skill.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                
+
+                <!-- YOUR SKILL -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">What skill can you teach them?</label>
-                    <select name="your_skill_id" class="input-field w-full px-4 py-3 rounded-xl" required>
-                        <option value="">Select a skill</option>
+                    <label class="text-sm font-medium">Teach Skill</label>
+                    <select name="your_skill_id" class="input-field w-full p-3 rounded-xl" required>
+                        <option value="">Select skill</option>
                         {% for skill in current_user.offered_skills %}
                             <option value="{{ skill.id }}">{{ skill.name }}</option>
                         {% endfor %}
                     </select>
-                    {% if not current_user.offered_skills %}
-                        <p class="text-yellow-400 text-sm mt-2">
-                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                            You haven't added any skills to offer. <a href="{{ url_for('profile.edit') }}" class="underline">Add skills</a>
-                        </p>
-                    {% endif %}
                 </div>
-                
+
+                <!-- DURATION -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">Session Duration</label>
-                    <div class="grid grid-cols-3 gap-4">
-                        <label class="glass p-4 rounded-xl cursor-pointer text-center hover:bg-white/10 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/20">
+                    <label class="text-sm font-medium">Duration</label>
+                    <div class="grid grid-cols-3 gap-3 mt-2">
+
+                        <label class="glass p-3 rounded-xl text-center cursor-pointer">
                             <input type="radio" name="duration" value="30" class="hidden">
-                            <span class="block text-2xl font-bold">30</span>
-                            <span class="text-sm text-gray-400">min</span>
-                            <span class="block text-indigo-400 text-sm mt-1">25 credits</span>
+                            <p>30 min</p>
                         </label>
-                        <label class="glass p-4 rounded-xl cursor-pointer text-center hover:bg-white/10 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/20">
-                            <input type="radio" name="duration" value="1h" class="hidden" checked>
-                            <span class="block text-2xl font-bold">1</span>
-                            <span class="text-sm text-gray-400">hour</span>
-                            <span class="block text-indigo-400 text-sm mt-1">50 credits</span>
+
+                        <label class="glass p-3 rounded-xl text-center cursor-pointer">
+                            <input type="radio" name="duration" value="60" class="hidden" checked>
+                            <p>1 hour</p>
                         </label>
-                        <label class="glass p-4 rounded-xl cursor-pointer text-center hover:bg-white/10 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/20">
-                            <input type="radio" name="duration" value="2h" class="hidden">
-                            <span class="block text-2xl font-bold">2</span>
-                            <span class="text-sm text-gray-400">hours</span>
-                            <span class="block text-indigo-400 text-sm mt-1">100 credits</span>
+
+                        <label class="glass p-3 rounded-xl text-center cursor-pointer">
+                            <input type="radio" name="duration" value="120" class="hidden">
+                            <p>2 hours</p>
                         </label>
+
                     </div>
                 </div>
-                
+
+                <!-- DATE TIME -->
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Date</label>
-                        <input type="date" name="date" class="input-field w-full px-4 py-3 rounded-xl" required min="{{ min_date }}">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Time</label>
-                        <input type="time" name="time" class="input-field w-full px-4 py-3 rounded-xl" required>
-                    </div>
+
+                    <input type="date" name="date"
+                           min="{{ min_date }}"
+                           class="input-field p-3 rounded-xl" required>
+
+                    <input type="time" name="time"
+                           class="input-field p-3 rounded-xl" required>
+
                 </div>
-                
-                <div class="bg-indigo-500/20 p-4 rounded-xl border border-indigo-500/30">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300">Your current balance:</span>
-                        <span class="font-bold text-xl">{{ current_user.credits }} credits</span>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2">Credits will be deducted when request is accepted</p>
+
+                <!-- BALANCE -->
+                <div class="bg-indigo-500/20 p-4 rounded-xl">
+                    <p>Your credits: <b>{{ current_user.credits }}</b></p>
+                    <p class="text-sm text-gray-400">Deducted after acceptance</p>
                 </div>
-                
-                <div class="flex space-x-4">
-                    <a href="{{ url_for('main.matches') }}" class="flex-1 glass px-4 py-3 rounded-xl text-center hover:bg-white/10">
+
+                <!-- BUTTONS -->
+                <div class="flex gap-3">
+
+                    <a href="{{ url_for('main.matches') }}"
+                       class="flex-1 text-center p-3 rounded-xl bg-gray-700">
                         Cancel
                     </a>
-                    <button type="submit" class="flex-1 btn-gradient px-4 py-3 rounded-xl font-semibold">
-                        <i class="fas fa-paper-plane mr-2"></i>Send Request
+
+                    <button type="submit"
+                            class="flex-1 p-3 rounded-xl bg-indigo-600 font-semibold">
+                        Send Request
                     </button>
+
                 </div>
+
             </div>
         </form>
+
     </div>
 </div>
 {% endblock %}
