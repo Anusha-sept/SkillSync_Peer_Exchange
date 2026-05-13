@@ -1,5 +1,9 @@
 import os
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or '9658486e6fd4d8d00fa2dfd6df6dd3a9a479d0ec0564871f4dee941e96b21c1f'
@@ -30,11 +34,12 @@ class Config:
     REMEMBER_COOKIE_DURATION = timedelta(days=14)
     
     # Flask-Mail
-    MAIL_SERVER = os.environ.get('EMAIL_HOST') or 'smtp.gmail.com'
-    MAIL_PORT = int(os.environ.get('EMAIL_PORT') or 587)
+    # Flask-Mail (Brevo SMTP)
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp-relay.brevo.com'
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('EMAIL_USER') or 'chalagerianusha4@gmail.com'
-    MAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD') or 'kotufkgcftbdkaxw'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = ('SkillSync Peer Exchange', 'chalagerianusha4@gmail.com')
     
     # Agora Config
