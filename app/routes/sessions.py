@@ -50,7 +50,7 @@ def create_request(user_id):
         
         if current_user.credits < credits:
             flash(f'You need {credits} credits but you only have {current_user.credits}. Please top up first.', 'danger')
-            return redirect(url_for('wallet.deposit'))
+            return redirect(url_for('wallet.index'))
         
         existing_request = Session.query.filter(
             Session.requester_id == current_user.id,
