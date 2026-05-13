@@ -21,19 +21,21 @@
         </div>
 
         <!-- ===================================================== -->
-        <!-- COMMON AVAILABILITY -->
+        <!-- BEST MATCHING SLOTS (MAIN UI) -->
         <!-- ===================================================== -->
         <div class="glass p-4 rounded-xl mb-6">
 
-            <h3 class="text-yellow-400 font-semibold mb-2">
-                🔥 Best Matching Slots
+            <h3 class="text-green-400 font-semibold mb-3">
+                🟢 Best Matching Slots
             </h3>
 
             {% if common_slots and common_slots|length > 0 %}
                 {% for slot in common_slots %}
-                    <div class="text-sm text-gray-300 mb-1">
-                        📅 Day {{ slot.day_of_week }} :
-                        ⏰ {{ slot.start }} - {{ slot.end }}
+                    <div class="p-2 mb-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                        <p class="text-sm text-gray-300">
+                            📅 Day {{ slot.day }} →
+                            ⏰ {{ slot.start.strftime('%H:%M') }} - {{ slot.end.strftime('%H:%M') }}
+                        </p>
                     </div>
                 {% endfor %}
             {% else %}
@@ -49,14 +51,14 @@
         <!-- ===================================================== -->
         <div class="grid grid-cols-2 gap-4 mb-6">
 
-            <!-- USER -->
+            <!-- USER BUSY -->
             <div class="glass p-4 rounded-xl">
-                <h3 class="text-green-400 font-semibold mb-2">Your Busy Slots</h3>
+                <h3 class="text-blue-400 font-semibold mb-2">Your Busy Slots</h3>
 
                 {% if user_busy and user_busy|length > 0 %}
                     {% for slot in user_busy %}
                         <p class="text-sm text-gray-300">
-                            ⛔ {{ slot.start.strftime('%H:%M') }} - {{ slot.end.strftime('%H:%M') }}
+                            ⛔ {{ slot[0].strftime('%H:%M') }} - {{ slot[1].strftime('%H:%M') }}
                         </p>
                     {% endfor %}
                 {% else %}
@@ -64,14 +66,14 @@
                 {% endif %}
             </div>
 
-            <!-- PROVIDER -->
+            <!-- PROVIDER BUSY -->
             <div class="glass p-4 rounded-xl">
                 <h3 class="text-purple-400 font-semibold mb-2">Provider Busy Slots</h3>
 
                 {% if provider_busy and provider_busy|length > 0 %}
                     {% for slot in provider_busy %}
                         <p class="text-sm text-gray-300">
-                            ⛔ {{ slot.start.strftime('%H:%M') }} - {{ slot.end.strftime('%H:%M') }}
+                            ⛔ {{ slot[0].strftime('%H:%M') }} - {{ slot[1].strftime('%H:%M') }}
                         </p>
                     {% endfor %}
                 {% else %}
@@ -93,37 +95,22 @@
                 <!-- LEARN SKILL -->
                 <div>
                     <label class="text-sm font-medium">Learn Skill</label>
-                    <select name="skill_id"
-                            class="input-field w-full p-3 rounded-xl"
-                            required>
-
+                    <select name="skill_id" class="input-field w-full p-3 rounded-xl" required>
                         <option value="">Select skill</option>
-
                         {% for skill in provider.offered_skills %}
-                            <option value="{{ skill.id }}">
-                                {{ skill.name }}
-                            </option>
+                            <option value="{{ skill.id }}">{{ skill.name }}</option>
                         {% endfor %}
-
                     </select>
                 </div>
 
                 <!-- TEACH SKILL -->
                 <div>
                     <label class="text-sm font-medium">Teach Skill</label>
-
-                    <select name="your_skill_id"
-                            class="input-field w-full p-3 rounded-xl"
-                            required>
-
+                    <select name="your_skill_id" class="input-field w-full p-3 rounded-xl" required>
                         <option value="">Select skill</option>
-
                         {% for skill in current_user.offered_skills %}
-                            <option value="{{ skill.id }}">
-                                {{ skill.name }}
-                            </option>
+                            <option value="{{ skill.id }}">{{ skill.name }}</option>
                         {% endfor %}
-
                     </select>
                 </div>
 
