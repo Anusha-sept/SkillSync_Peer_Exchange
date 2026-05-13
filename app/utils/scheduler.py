@@ -9,6 +9,11 @@ from app.utils.email import create_notification
 logger = logging.getLogger(__name__)
 
 
+def _run_with_app_context(app, func):
+    with app.app_context():
+        return func()
+
+
 def check_pending_sessions():
     try:
         cutoff = datetime.utcnow() - timedelta(hours=24)
@@ -130,37 +135,49 @@ def send_review_reminders():
 
 
 def init_scheduler(app):
+    if app.config.get('SCHEDULER_STARTED'):
+        return None
+
     scheduler = BackgroundScheduler()
     
     scheduler.add_job(
-        check_pending_sessions,
+        _run_with_app_context,
         'interval',
         hours=1,
-        id='check_pending_sessions'
+        id='check_pending_sessions',
+        args=[app, check_pending_sessions],
+        replace_existing=True,
     )
     
     scheduler.add_job(
-        check_upcoming_sessions_for_reminder,
+        _run_with_app_context,
         'interval',
         minutes=1,
-        id='check_upcoming_sessions'
+        id='check_upcoming_sessions',
+        args=[app, check_upcoming_sessions_for_reminder],
+        replace_existing=True,
     )
     
     scheduler.add_job(
-        check_completed_sessions,
+        _run_with_app_context,
         'interval',
         minutes=1,
-        id='check_completed_sessions'
+        id='check_completed_sessions',
+        args=[app, check_completed_sessions],
+        replace_existing=True,
     )
     
     scheduler.add_job(
-        send_review_reminders,
+        _run_with_app_context,
         'interval',
         hours=24,
-        id='send_review_reminders'
+        id='send_review_reminders',
+        args=[app, send_review_reminders],
+        replace_existing=True,
     )
     
     scheduler.start()
+    app.config['SCHEDULER_STARTED'] = True
     logger.info("Scheduler started")
     
     return scheduler
