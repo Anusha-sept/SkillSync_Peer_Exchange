@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Users - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">Explore Users</h1>
+        <p class="text-gray-400 mt-2">Discover skilled learners and potential exchange partners</p>
+    </div>
+    
+    <div class="flex flex-wrap gap-4 mb-8">
+        <select class="glass px-4 py-2 rounded-xl" id="skillFilter">
+            <option value="">All Skills</option>
+            {% for skill in skills %}
+                <option value="{{ skill.id }}">{{ skill.name }}</option>
+            {% endfor %}
+        </select>
+        <select class="glass px-4 py-2 rounded-xl" id="levelFilter">
+            <option value="">All Levels</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+            <option value="expert">Expert</option>
+        </select>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for user in users %}
+            <div class="glass-card p-6">
+                <div class="flex items-center space-x-4 mb-4">
+                    <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="w-16 h-16 rounded-full object-cover ring-2 ring-indigo-500">
+                    <div>
+                        <h3 class="font-semibold text-lg">{{ user.full_name }}</h3>
+                        <p class="text-gray-400 text-sm">@{{ user.username }}</p>
+                        <div class="flex items-center mt-1">
+                            <span class="status-dot {% if user.is_online %}status-online{% else %}status-offline{% endif %} mr-2"></span>
+                            <span class="text-xs text-gray-400">{% if user.is_online %}Online{% else %}Offline{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if user.bio %}
+                    <p class="text-gray-400 text-sm mb-4">{{ user.bio[:100] }}...</p>
+                {% endif %}
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {% for skill in user.offered_skills[:3] %}
+                        <span class="skill-tag">{{ skill.name }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex items-center justify-between pt-4 border-t border-white/10">
+                    <div class="flex items-center">
+                        <i class="fas fa-star text-yellow-400 mr-1"></i>
+                        <span class="text-sm">{{ "%.1f"|format(user.average_rating) }}</span>
+                        <span class="text-gray-500 text-sm ml-1">({{ user.reviews_received.count() }})</span>
+                    </div>
+                    <a href="{{ url_for('sessions.create_request', user_id=user.id) }}" class="btn-gradient px-4 py-2 rounded-lg text-sm">
+                        Request Exchange
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if not users %}
+        <div class="text-center py-16">
+            <i class="fas fa-users text-6xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">No users found</h3>
+            <p class="text-gray-400">Check back later for new members</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

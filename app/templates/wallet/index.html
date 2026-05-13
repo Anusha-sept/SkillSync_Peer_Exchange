@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Wallet - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">My Wallet</h1>
+    
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card p-6 md:col-span-2">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <p class="text-gray-400 text-sm">Current Balance</p>
+                    <p class="text-4xl font-bold gradient-text">{{ balance }}</p>
+                    <p class="text-gray-500 text-sm">credits available</p>
+                </div>
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                    <i class="fas fa-wallet text-2xl"></i>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <a href="{{ url_for('wallet.add_credits') }}" class="btn-gradient px-6 py-3 rounded-xl font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Credits
+                </a>
+                <a href="{{ url_for('wallet.transfer') }}" class="glass px-6 py-3 rounded-xl font-medium hover:bg-white/10">
+                    <i class="fas fa-paper-plane mr-2"></i>Transfer
+                </a>
+                <a href="{{ url_for('wallet.history') }}" class="glass px-6 py-3 rounded-xl font-medium hover:bg-white/10">
+                    <i class="fas fa-history mr-2"></i>History
+                </a>
+            </div>
+        </div>
+        
+        <div class="glass-card p-6">
+            <h3 class="font-semibold mb-4">Quick Stats</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Total Earned</span>
+                    <span class="font-semibold text-emerald-400">{{ current_user.total_credits_earned }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Current Balance</span>
+                    <span class="font-semibold">{{ current_user.credits }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Transactions</span>
+                    <span class="font-semibold">{{ transactions|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="glass-card p-6">
+        <h2 class="text-xl font-bold mb-6">Recent Transactions</h2>
+        
+        {% if transactions %}
+            <div class="space-y-3">
+                {% for txn in transactions[:10] %}
+                    <div class="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full {% if txn.amount > 0 %}bg-emerald-500/20 flex items-center justify-center{% else %}bg-red-500/20 flex items-center justify-center{% endif %}">
+                                <i class="fas {% if txn.amount > 0 %}fa-arrow-up text-emerald-400{% else %}fa-arrow-down text-red-400{% endif %}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">{{ txn.description }}</p>
+                                <p class="text-gray-500 text-xs">{{ txn.created_at.strftime('%B %d, %Y at %H:%M') }}</p>
+                            </div>
+                        </div>
+                        <span class="font-bold {% if txn.amount > 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+                            {{ '+' if txn.amount > 0 else '' }}{{ txn.amount }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% if transactions|length > 10 %}
+                <div class="text-center mt-6">
+                    <a href="{{ url_for('wallet.history') }}" class="text-indigo-400 hover:text-indigo-300">View all transactions</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-receipt text-4xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400">No transactions yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

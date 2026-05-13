@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Certificates - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">All Certificates</h1>
+    
+    <div class="glass-card p-6">
+        {% if certificates %}
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left py-3 px-4">User</th>
+                        <th class="text-left py-3 px-4">Title</th>
+                        <th class="text-left py-3 px-4">Code</th>
+                        <th class="text-left py-3 px-4">Credits</th>
+                        <th class="text-left py-3 px-4">Issued</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr class="border-b border-white/5">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ url_for('static', filename='uploads/' + cert.user.avatar) }}" class="w-8 h-8 rounded-full object-cover">
+                                <span>{{ cert.user.username }}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">{{ cert.title }}</td>
+                        <td class="py-3 px-4 font-mono text-sm">{{ cert.certificate_code }}</td>
+                        <td class="py-3 px-4 text-indigo-400">{{ cert.credits_at_achievement }}</td>
+                        <td class="py-3 px-4 text-gray-400">{{ cert.issued_at.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-center py-8 text-gray-400">No certificates issued yet</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

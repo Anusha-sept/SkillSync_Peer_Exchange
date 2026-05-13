@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">Platform Analytics</h1>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6">
+            <p class="text-gray-400 text-sm mb-2">Sessions (Last 7 Days)</p>
+            <p class="text-3xl font-bold gradient-text">{{ sessions_last_7 }}</p>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-400 text-sm mb-2">Sessions (Last 30 Days)</p>
+            <p class="text-3xl font-bold gradient-text">{{ sessions_last_30 }}</p>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-400 text-sm mb-2">New Users (Last 7 Days)</p>
+            <p class="text-3xl font-bold gradient-text">{{ new_users_last_7 }}</p>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-400 text-sm mb-2">New Users (Last 30 Days)</p>
+            <p class="text-3xl font-bold gradient-text">{{ new_users_last_30 }}</p>
+        </div>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-4">Session Status Breakdown</h2>
+            <div class="space-y-4">
+                {% for status, count in status_breakdown %}
+                <div class="flex items-center justify-between">
+                    <span class="capitalize">{{ status }}</span>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-500" style="width: {{ (count / (sessions_last_30 or 1) * 100)|round }}%"></div>
+                        </div>
+                        <span class="font-medium">{{ count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-4">Quick Stats</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Average Rating Platform-wide</span>
+                    <span class="font-semibold">4.8</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Most Popular Skill Category</span>
+                    <span class="font-semibold">Programming</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Avg Session Duration</span>
+                    <span class="font-semibold">45 min</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Active Sessions Now</span>
+                    <span class="font-semibold text-emerald-400">5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Register - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <a href="{{ url_for('main.index') }}" class="inline-flex items-center space-x-2">
+                <i class="fas fa-sync-alt text-4xl gradient-text"></i>
+                <span class="font-bold text-3xl gradient-text">SkillSync Nexus</span>
+            </a>
+            <h2 class="mt-6 text-3xl font-bold">Create Account</h2>
+            <p class="mt-2 text-gray-400">Join our community of skill exchange enthusiasts</p>
+        </div>
+        
+        <div class="glass-card p-8">
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">First Name</label>
+                            {{ form.first_name(class="input-field w-full px-4 py-3 rounded-xl focus:outline-none") }}
+                            {% if form.first_name.errors %}
+                                <p class="text-red-400 text-sm mt-1">{{ form.first_name.errors[0] }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Last Name</label>
+                            {{ form.last_name(class="input-field w-full px-4 py-3 rounded-xl focus:outline-none") }}
+                            {% if form.last_name.errors %}
+                                <p class="text-red-400 text-sm mt-1">{{ form.last_name.errors[0] }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Username</label>
+                        {{ form.username(class="input-field w-full px-4 py-3 rounded-xl focus:outline-none") }}
+                        {% if form.username.errors %}
+                            <p class="text-red-400 text-sm mt-1">{{ form.username.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email Address</label>
+                        {{ form.email(class="input-field w-full px-4 py-3 rounded-xl focus:outline-none") }}
+                        {% if form.email.errors %}
+                            <p class="text-red-400 text-sm mt-1">{{ form.email.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        {{ form.password(class="input-field w-full px-4 py-3 rounded-xl focus:outline-none") }}
+                        {% if form.password.errors %}
+                            <p class="text-red-400 text-sm mt-1">{{ form.password.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Confirm Password</label>
+                        {{ form.confirm_password(class="input-field w-full px-4 py-3 rounded-xl focus:outline-none") }}
+                        {% if form.confirm_password.errors %}
+                            <p class="text-red-400 text-sm mt-1">{{ form.confirm_password.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex items-center">
+                        {{ form.agree_terms(class="w-4 h-4 rounded border-gray-600 bg-transparent text-indigo-500 focus:ring-indigo-500") }}
+                        <label class="ml-2 text-sm text-gray-400">I agree to the <a href="#" class="text-indigo-400">Terms & Conditions</a></label>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-indigo-500/20 to-pink-500/20 p-4 rounded-xl border border-indigo-500/30">
+                        <p class="text-center text-sm">
+                            <i class="fas fa-gift text-yellow-400 mr-2"></i>
+                            <span class="font-semibold text-yellow-400">50 FREE CREDITS</span> on registration!
+                        </p>
+                    </div>
+                    
+                    {{ form.submit(class="btn-gradient w-full py-3 px-4 rounded-xl font-semibold text-white cursor-pointer") }}
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-400">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-indigo-400 hover:text-indigo-300 font-medium">Sign in</a></p>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('main.index') }}" class="text-gray-400 hover:text-white">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

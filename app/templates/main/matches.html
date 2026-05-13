@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}AI Matches - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">AI-Powered Matches</h1>
+        <p class="text-gray-400 mt-2">Our intelligent algorithm finds the perfect exchange partners for you</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for match in matches %}
+            <div class="glass-card p-6 relative">
+                <div class="absolute -top-3 -right-3">
+                    <div class="bg-gradient-to-r from-indigo-500 to-pink-500 px-4 py-1 rounded-full text-sm font-bold">
+                        {{ match.score }}% Match
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4 mb-4">
+                    <img src="{{ url_for('static', filename='uploads/' + match.user.avatar) }}" class="w-20 h-20 rounded-full object-cover ring-2 ring-indigo-500">
+                    <div>
+                        <h3 class="font-semibold text-xl">{{ match.user.full_name }}</h3>
+                        <p class="text-gray-400 text-sm">@{{ match.user.username }}</p>
+                        <div class="flex items-center mt-1">
+                            <span class="status-dot {% if match.user.is_online %}status-online{% else %}status-offline{% endif %} mr-2"></span>
+                            <span class="text-xs text-gray-400">{% if match.user.is_online %}Online{% else %}Offline{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-star text-yellow-400 mr-2"></i>
+                        <span class="font-medium">{{ "%.1f"|format(match.user.average_rating) }}</span>
+                        <span class="text-gray-400 text-sm ml-1">({{ match.user.reviews_received.count() }} reviews)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-award text-purple-400 mr-2"></i>
+                        <span class="text-sm">{{ match.user.achievement_title }}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400 mb-2">Skills you can learn:</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in match.matching_skills %}
+                            <span class="skill-tag bg-emerald-500/20 border-emerald-500/30">{{ skill.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400 mb-2">Their skills you can teach:</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in match.common_skills %}
+                            <span class="skill-tag bg-indigo-500/20 border-indigo-500/30">{{ skill.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% if match.user.bio %}
+                    <p class="text-gray-400 text-sm mb-4 border-t border-white/10 pt-4">
+                        <i class="fas fa-quote-left mr-2 text-indigo-400"></i>{{ match.user.bio[:100] }}...
+                    </p>
+                {% endif %}
+                
+                <div class="flex space-x-3">
+                    <a href="{{ url_for('profile.view', username=match.user.username) }}" class="flex-1 glass px-4 py-2 rounded-xl text-center hover:bg-white/10">
+                        <i class="fas fa-user mr-2"></i>View Profile
+                    </a>
+                    <a href="{{ url_for('sessions.create_request', user_id=match.user.id) }}" class="flex-1 btn-gradient px-4 py-2 rounded-xl text-center font-medium">
+                        <i class="fas fa-handshake mr-2"></i>Request
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if not matches %}
+        <div class="text-center py-16">
+            <i class="fas fa-magic text-6xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">No matches found</h3>
+            <p class="text-gray-400 mb-4">Complete your profile and add skills to find better matches</p>
+            <a href="{{ url_for('profile.edit') }}" class="btn-gradient px-6 py-3 rounded-xl inline-block">
+                <i class="fas fa-edit mr-2"></i>Edit Profile
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

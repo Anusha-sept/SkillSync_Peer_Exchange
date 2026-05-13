@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Add Credits - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="glass-card p-8">
+        <h1 class="text-2xl font-bold mb-6 text-center">Add Credits to Your Wallet</h1>
+        
+        <div class="grid md:grid-cols-2 gap-4 mb-8">
+            {% for package in packages %}
+                <label class="glass p-6 rounded-xl cursor-pointer text-center hover:bg-white/10 transition-all has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/20">
+                    <input type="radio" name="amount" value="{{ package.amount }}" class="hidden" {% if loop.first %}checked{% endif %}>
+                    <span class="block text-3xl font-bold gradient-text">{{ package.amount }}</span>
+                    <span class="text-gray-400">credits</span>
+                    <div class="mt-2 text-sm">
+                        <span class="text-white font-semibold">{{ package.price }}</span>
+                        {% if package.bonus > 0 %}
+                            <span class="ml-2 text-emerald-400">+{{ package.bonus }} bonus</span>
+                        {% endif %}
+                    </div>
+                </label>
+            {% endfor %}
+        </div>
+        
+        <form method="POST">
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">Custom Amount</label>
+                <input type="number" name="custom_amount" class="input-field w-full px-4 py-3 rounded-xl" placeholder="Enter custom amount (optional)" min="10">
+            </div>
+            
+            <div class="bg-indigo-500/20 p-4 rounded-xl border border-indigo-500/30 mb-6">
+                <p class="text-sm text-gray-300">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    This is a demo. In production, you would integrate with a payment gateway like Stripe or PayPal.
+                </p>
+            </div>
+            
+            <button type="submit" class="btn-gradient w-full py-3 px-4 rounded-xl font-semibold">
+                <i class="fas fa-credit-card mr-2"></i>Add Credits
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Your Profile - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Progress Header -->
+    <div class="glass-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold">🎯 Complete Your Profile</h1>
+                <p class="text-gray-400 mt-1">Set up your profile to start exchanging skills</p>
+            </div>
+            <div class="text-right">
+                <span class="px-3 py-1 rounded-full text-sm bg-yellow-500/20 text-yellow-400">
+                    <i class="fas fa-exclamation-circle mr-1"></i>Setup Required
+                </span>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-700 rounded-full h-2">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" style="width: 60%"></div>
+        </div>
+        
+        <div class="flex justify-between mt-2 text-xs text-gray-400">
+            <span class="text-indigo-400">✓ Profile & Skills</span>
+            <span>Availability →</span>
+        </div>
+    </div>
+
+    <!-- Alert Message -->
+    <div class="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 p-4 rounded-xl border border-indigo-500/30 mb-6">
+        <div class="flex items-start">
+            <i class="fas fa-info-circle text-indigo-400 text-xl mt-0.5 mr-3"></i>
+            <div>
+                <p class="text-sm text-indigo-300">
+                    <strong>Complete your profile, add skills, credits, and availability to start exchanging skills.</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-card p-8">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <!-- Avatar Section -->
+            <div class="text-center mb-8">
+                <div class="relative inline-block">
+                    <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" 
+                         class="w-28 h-28 rounded-full object-cover mx-auto ring-4 ring-indigo-500">
+                    <label class="absolute bottom-0 right-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-600 transition-all">
+                        <i class="fas fa-camera text-sm"></i>
+                        <input type="file" name="avatar" class="hidden" accept="image/*">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Basic Info -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">First Name *</label>
+                    <input type="text" name="first_name" value="{{ current_user.first_name }}" 
+                           class="input-field w-full px-4 py-3 rounded-xl" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Last Name *</label>
+                    <input type="text" name="last_name" value="{{ current_user.last_name }}" 
+                           class="input-field w-full px-4 py-3 rounded-xl" required>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">Bio</label>
+                <textarea name="bio" rows="3" class="input-field w-full px-4 py-3 rounded-xl resize-none" 
+                          placeholder="Tell others about yourself, your experience...">{{ current_user.bio or '' }}</textarea>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-sm font-medium mb-2">Experience Level</label>
+                <select name="experience_level" class="input-field w-full px-4 py-3 rounded-xl">
+                    <option value="beginner" {% if current_user.experience_level == 'beginner' %}selected{% endif %}>🌱 Beginner - Just starting out</option>
+                    <option value="intermediate" {% if current_user.experience_level == 'intermediate' %}selected{% endif %}>🌿 Intermediate - Have some experience</option>
+                    <option value="advanced" {% if current_user.experience_level == 'advanced' %}selected{% endif %}>🌳 Advanced - Very experienced</option>
+                    <option value="expert" {% if current_user.experience_level == 'expert' %}selected{% endif %}>⭐ Expert - Professional level</option>
+                </select>
+            </div>
+
+            <!-- Credit Rates Info -->
+            <div class="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 p-4 rounded-xl border border-emerald-500/20 mb-6">
+                <h4 class="text-sm font-semibold text-emerald-400 mb-3">💰 Credit Rates (Per Session)</h4>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-emerald-500/10 p-3 rounded-lg">
+                        <span class="block text-xl font-bold text-emerald-400">30</span>
+                        <span class="text-xs text-gray-400">min</span>
+                        <span class="block text-emerald-300 text-sm font-semibold">25 credits</span>
+                    </div>
+                    <div class="bg-emerald-500/10 p-3 rounded-lg">
+                        <span class="block text-xl font-bold text-emerald-400">1</span>
+                        <span class="text-xs text-gray-400">hour</span>
+                        <span class="block text-emerald-300 text-sm font-semibold">50 credits</span>
+                    </div>
+                    <div class="bg-emerald-500/10 p-3 rounded-lg">
+                        <span class="block text-xl font-bold text-emerald-400">2</span>
+                        <span class="text-xs text-gray-400">hours</span>
+                        <span class="block text-emerald-300 text-sm font-semibold">100 credits</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills You Can Teach -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="block text-sm font-medium">
+                        <span class="text-indigo-400 text-lg">🎓 Skills You Can Teach *</span>
+                        <span class="text-gray-400 text-xs ml-2">(Select at least one)</span>
+                    </label>
+                </div>
+
+                <div class="space-y-3">
+                    {% for skill in skills %}
+                    <div class="skill-card glass p-4 rounded-xl transition-all duration-300 hover:bg-white/5 
+                                {% if skill.id in offered_ids %}border-2 border-indigo-500 bg-indigo-500/10{% endif %}">
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center cursor-pointer flex-1">
+                                <input type="checkbox" name="offered_skills" value="{{ skill.id }}" 
+                                       class="w-5 h-5 rounded border-gray-500 text-indigo-500 focus:ring-indigo-500 bg-transparent"
+                                       {% if skill.id in offered_ids %}checked{% endif %}
+                                       onchange="toggleSkillOptions(this, {{ skill.id }})">
+                                <span class="ml-3 font-medium">{{ skill.name }}</span>
+                                <span class="ml-2 text-xs text-gray-400">({{ skill.category or 'General' }})</span>
+                            </label>
+                            
+                            <!-- Duration & Credits Dropdown -->
+                            <div id="options_{{ skill.id }}" class="flex items-center space-x-3 {% if skill.id not in offered_ids %}hidden{% endif %}">
+                                <div class="relative">
+                                    <select name="duration_{{ skill.id }}" class="input-field w-28 px-3 py-2 rounded-lg text-sm appearance-none bg-gray-700">
+                                        {% for option in credit_options %}
+                                        <option value="{{ option.value }}" 
+                                                {% if user_preferences.get(skill.id, {}).get('duration') == option.value|int %}selected{% elif option.value == '60' and not user_preferences.get(skill.id) %}selected{% endif %}>
+                                            {{ option.label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                                </div>
+                                <div class="flex items-center text-emerald-400 text-sm font-medium">
+                                    <span id="credits_display_{{ skill.id }}">
+                                        {% if user_preferences.get(skill.id) %}{{ user_preferences[skill.id].credits }}{% else %}50{% endif %}
+                                    </span>
+                                    <span class="ml-1">credits</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Skills You Want to Learn -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="block text-sm font-medium">
+                        <span class="text-pink-400 text-lg">📚 Skills You Want to Learn</span>
+                        <span class="text-gray-400 text-xs ml-2">(Optional)</span>
+                    </label>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    {% for skill in skills %}
+                    <label class="skill-checkbox glass px-4 py-2 rounded-xl cursor-pointer text-sm hover:bg-white/10 transition-all
+                                {% if skill.id in wanted_ids %}border-pink-500 bg-pink-500/20{% endif %}">
+                        <input type="checkbox" name="wanted_skills" value="{{ skill.id }}" class="hidden"
+                               {% if skill.id in wanted_ids %}checked{% endif %}>
+                        <span>{{ skill.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Availability Section -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="block text-sm font-medium">
+                        <span class="text-amber-400 text-lg">📅 Availability</span>
+                        <span class="text-gray-400 text-xs ml-2">(Set your available days & times)</span>
+                    </label>
+                </div>
+
+                <div class="space-y-3">
+                    {% for day in days %}
+                    <div class="glass p-4 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-8 text-center font-medium">{{ day[:3] }}</span>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" name="available_{{ loop.index0 }}" 
+                                           class="toggle-day w-5 h-5 rounded border-gray-500 text-amber-500 focus:ring-amber-500 bg-transparent"
+                                           {% if loop.index0 in availability %}checked{% endif %}
+                                           onchange="toggleDayTime(this, {{ loop.index0 }})">
+                                </label>
+                            </div>
+                            
+                            <div id="time_slots_{{ loop.index0 }}" class="flex items-center space-x-2 {% if loop.index0 not in availability %}hidden{% endif %}">
+                                <input type="time" name="start_{{ loop.index0 }}" 
+                                       value="{{ availability.get(loop.index0, {}).get('start', '09:00') }}"
+                                       class="input-field w-24 px-3 py-2 rounded-lg text-sm">
+                                <span class="text-gray-400">to</span>
+                                <input type="time" name="end_{{ loop.index0 }}" 
+                                       value="{{ availability.get(loop.index0, {}).get('end', '17:00') }}"
+                                       class="input-field w-24 px-3 py-2 rounded-lg text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Credits Info -->
+            <div class="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-300">Your starting credits</p>
+                        <p class="text-xs text-gray-400">Use these to book skill exchanges</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-3xl font-bold gradient-text">50</span>
+                        <span class="text-gray-400 text-sm ml-1">credits</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex space-x-4">
+                <a href="{{ url_for('main.dashboard') }}" class="flex-1 glass px-4 py-3 rounded-xl text-center hover:bg-white/10">
+                    Cancel
+                </a>
+                <button type="submit" class="flex-1 btn-gradient px-4 py-3 rounded-xl font-semibold">
+                    <i class="fas fa-save mr-2"></i>Save & Continue
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const creditMap = {
+    '30': 25,
+    '60': 50,
+    '120': 100
+};
+
+function toggleSkillOptions(checkbox, skillId) {
+    const optionsDiv = document.getElementById('options_' + skillId);
+    const card = checkbox.closest('.skill-card');
+    
+    if (checkbox.checked) {
+        optionsDiv.classList.remove('hidden');
+        card.classList.add('border-indigo-500', 'bg-indigo-500/10');
+    } else {
+        optionsDiv.classList.add('hidden');
+        card.classList.remove('border-indigo-500', 'bg-indigo-500/10');
+    }
+}
+
+function updateCredits(skillId, durationSelect) {
+    const credits = creditMap[durationSelect.value];
+    document.getElementById('credits_display_' + skillId).textContent = credits;
+}
+
+// Add change listeners to all duration selects
+document.querySelectorAll('select[name^="duration_"]').forEach(select => {
+    const skillId = select.name.replace('duration_', '');
+    select.addEventListener('change', function() {
+        updateCredits(skillId, this);
+    });
+});
+
+function toggleDayTime(checkbox, dayIndex) {
+    const timeSlots = document.getElementById('time_slots_' + dayIndex);
+    if (checkbox.checked) {
+        timeSlots.classList.remove('hidden');
+    } else {
+        timeSlots.classList.add('hidden');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize skill options visibility
+    document.querySelectorAll('input[name="offered_skills"]').forEach(checkbox => {
+        const skillId = checkbox.value;
+        const optionsDiv = document.getElementById('options_' + skillId);
+        if (checkbox.checked) {
+            optionsDiv.classList.remove('hidden');
+        }
+    });
+    
+    // Initialize day time visibility
+    document.querySelectorAll('.toggle-day').forEach((checkbox, index) => {
+        const timeSlots = document.getElementById('time_slots_' + index);
+        if (checkbox.checked) {
+            timeSlots.classList.remove('hidden');
+        }
+    });
+});
+</script>
+
+<style>
+.skill-card {
+    transition: all 0.3s ease;
+}
+.skill-checkbox {
+    transition: all 0.3s ease;
+}
+.skill-checkbox:has(input:checked) {
+    border-color: #ec4899;
+    background: rgba(236, 72, 153, 0.2);
+}
+select.appearance-none {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+</style>
+{% endblock %}

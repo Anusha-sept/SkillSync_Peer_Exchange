@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Leave Review - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="glass-card p-8">
+        <h1 class="text-2xl font-bold mb-6 text-center">Rate Your Experience</h1>
+        
+        <div class="text-center mb-8">
+            <img src="{{ url_for('static', filename='uploads/' + other_user.avatar) }}" class="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-indigo-500">
+            <h2 class="text-xl font-semibold">{{ other_user.full_name }}</h2>
+            <p class="text-gray-400">Session: {{ session.provider_skill.name if session.requester_id == current_user.id else session.requester_skill.name }}</p>
+        </div>
+        
+        <form method="POST">
+            <div class="mb-6">
+                <label class="block text-center text-sm font-medium mb-4">How was your experience?</label>
+                <div class="flex justify-center space-x-2" id="star-rating">
+                    {% for i in range(5, 0, -1) %}
+                        <button type="button" class="star-btn text-4xl text-gray-600 hover:text-yellow-400 transition-colors" data-rating="{{ i }}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="rating" id="rating-value" value="5">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">Your feedback (optional)</label>
+                <textarea name="comment" rows="4" class="input-field w-full px-4 py-3 rounded-xl resize-none" placeholder="Share your experience..."></textarea>
+            </div>
+            
+            <div class="flex space-x-4">
+                <a href="{{ url_for('sessions.my_sessions') }}" class="flex-1 glass px-4 py-3 rounded-xl text-center hover:bg-white/10">
+                    Skip
+                </a>
+                <button type="submit" class="flex-1 btn-gradient px-4 py-3 rounded-xl font-semibold">
+                    Submit Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        document.getElementById('rating-value').value = rating;
+        
+        document.querySelectorAll('.star-btn').forEach(b => {
+            if (b.dataset.rating <= rating) {
+                b.classList.remove('text-gray-600');
+                b.classList.add('text-yellow-400');
+            } else {
+                b.classList.remove('text-yellow-400');
+                b.classList.add('text-gray-600');
+            }
+        });
+    });
+});
+
+document.querySelectorAll('.star-btn').forEach(btn => btn.classList.add('text-yellow-400'));
+</script>
+{% endblock %}

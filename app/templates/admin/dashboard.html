@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+        <p class="text-gray-400">Manage your SkillSync Nexus platform</p>
+    </div>
+    
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold gradient-text">{{ stats.total_users }}</p>
+            <p class="text-gray-400 text-sm">Total Users</p>
+            <p class="text-emerald-400 text-xs mt-2">{{ stats.active_users }} active</p>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                    <i class="fas fa-video text-xl"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold gradient-text">{{ stats.total_sessions }}</p>
+            <p class="text-gray-400 text-sm">Total Sessions</p>
+            <p class="text-emerald-400 text-xs mt-2">{{ stats.completed_sessions }} completed</p>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                    <i class="fas fa-coins text-xl"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold gradient-text">{{ stats.total_credits }}</p>
+            <p class="text-gray-400 text-sm">Total Credits</p>
+            <p class="text-purple-400 text-xs mt-2">{{ stats.total_credits_earned }} earned</p>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                    <i class="fas fa-layer-group text-xl"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold gradient-text">{{ stats.total_skills }}</p>
+            <p class="text-gray-400 text-sm">Total Skills</p>
+            <p class="text-yellow-400 text-xs mt-2">{{ stats.pending_sessions }} pending</p>
+        </div>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Recent Users</h2>
+                <a href="{{ url_for('admin.users') }}" class="text-indigo-400 text-sm hover:text-indigo-300">View all</a>
+            </div>
+            <div class="space-y-3">
+                {% for user in recent_users %}
+                    <div class="flex items-center justify-between py-2 border-b border-white/5">
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="w-10 h-10 rounded-full object-cover">
+                            <div>
+                                <p class="font-medium">{{ user.username }}</p>
+                                <p class="text-xs text-gray-400">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs {% if user.is_active %}bg-emerald-500/20 text-emerald-400{% else %}bg-red-500/20 text-red-400{% endif %}">
+                            {{ 'Active' if user.is_active else 'Inactive' }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Recent Sessions</h2>
+                <a href="{{ url_for('admin.sessions') }}" class="text-indigo-400 text-sm hover:text-indigo-300">View all</a>
+            </div>
+            <div class="space-y-3">
+                {% for session in recent_sessions %}
+                    <div class="flex items-center justify-between py-2 border-b border-white/5">
+                        <div>
+                            <p class="font-medium">Session #{{ session.id }}</p>
+                            <p class="text-xs text-gray-400">{{ session.scheduled_start.strftime('%b %d, %H:%M') }}</p>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs {% if session.status == 'completed' %}bg-emerald-500/20 text-emerald-400{% elif session.status == 'pending' %}bg-yellow-500/20 text-yellow-400{% else %}bg-gray-500/20 text-gray-400{% endif %}">
+                            {{ session.status }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

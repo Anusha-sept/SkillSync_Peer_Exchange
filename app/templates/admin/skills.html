@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Skills - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">Manage Skills</h1>
+    
+    <div class="glass-card p-6 mb-8">
+        <form method="POST" class="flex flex-col md:flex-row gap-4">
+            <input type="text" name="name" class="input-field flex-1 px-4 py-3 rounded-xl" placeholder="Skill name" required>
+            <input type="text" name="category" class="input-field w-40 px-4 py-3 rounded-xl" placeholder="Category">
+            <input type="text" name="description" class="input-field flex-1 px-4 py-3 rounded-xl" placeholder="Description">
+            <button type="submit" class="btn-gradient px-6 py-3 rounded-xl font-medium">
+                <i class="fas fa-plus mr-2"></i>Add
+            </button>
+        </form>
+    </div>
+    
+    <div class="glass-card p-6">
+        <h2 class="text-xl font-bold mb-4">All Skills ({{ skills|length }})</h2>
+        
+        {% if skills %}
+            <div class="space-y-3">
+                {% for skill in skills %}
+                    <div class="glass p-4 rounded-xl flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium">{{ skill.name }}</h3>
+                            <p class="text-sm text-gray-400">{{ skill.category or 'No category' }}</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <form method="POST" action="{{ url_for('admin.edit_skill', skill_id=skill.id) }}" class="flex items-center space-x-2">
+                                <input type="text" name="name" value="{{ skill.name }}" class="input-field w-32 px-2 py-1 rounded text-sm">
+                                <input type="text" name="category" value="{{ skill.category or '' }}" class="input-field w-24 px-2 py-1 rounded text-sm" placeholder="Category">
+                                <input type="text" name="description" value="{{ skill.description or '' }}" class="input-field w-40 px-2 py-1 rounded text-sm" placeholder="Description">
+                                <button type="submit" class="text-indigo-400 hover:text-indigo-300">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </form>
+                            <a href="{{ url_for('admin.delete_skill', skill_id=skill.id) }}" class="text-red-400 hover:text-red-300" onclick="return confirm('Delete this skill?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center py-8 text-gray-400">No skills available</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

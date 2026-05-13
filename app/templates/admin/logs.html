@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Logs - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">Admin Logs</h1>
+    
+    <div class="glass-card p-6">
+        {% if logs.items %}
+            <div class="space-y-3">
+                {% for log in logs.items %}
+                    <div class="glass p-4 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">{{ log.action }}</p>
+                                {% if log.details %}
+                                    <p class="text-sm text-gray-400 mt-1">{{ log.details }}</p>
+                                {% endif %}
+                            </div>
+                            <span class="text-gray-500 text-sm">{{ log.created_at.strftime('%b %d, %H:%M') }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-6 flex justify-center">
+                {% if logs.has_prev %}
+                    <a href="{{ url_for('admin.logs', page=logs.prev_num) }}" class="px-4 py-2 rounded-lg glass hover:bg-white/10 mr-2">Previous</a>
+                {% endif %}
+                <span class="px-4 py-2 text-gray-400">Page {{ logs.page }} of {{ logs.pages }}</span>
+                {% if logs.has_next %}
+                    <a href="{{ url_for('admin.logs', page=logs.next_num) }}" class="px-4 py-2 rounded-lg glass hover:bg-white/10 ml-2">Next</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="text-center py-8 text-gray-400">No admin logs</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

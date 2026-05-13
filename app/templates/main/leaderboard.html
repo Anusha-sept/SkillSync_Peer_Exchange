@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">🏆 Leaderboard</h1>
+        <p class="text-gray-400 mt-2">Top skill exchange contributors</p>
+    </div>
+    
+    <div class="space-y-4">
+        {% for user in top_users %}
+            <div class="glass-card p-6 flex items-center space-x-6 {% if loop.index <= 3 %}relative{% endif %}">
+                {% if loop.index == 1 %}
+                    <div class="absolute -left-2 w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center text-lg">🥇</div>
+                {% elif loop.index == 2 %}
+                    <div class="absolute -left-2 w-8 h-8 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center text-lg">🥈</div>
+                {% elif loop.index == 3 %}
+                    <div class="absolute -left-2 w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center text-lg">🥉</div>
+                {% else %}
+                    <div class="absolute -left-2 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 font-bold">{{ loop.index }}</div>
+                {% endif %}
+                
+                <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="w-16 h-16 rounded-full object-cover ring-2 ring-indigo-500">
+                
+                <div class="flex-1">
+                    <h3 class="font-semibold text-lg">
+                        {{ user.full_name }}
+                        {% if user.id == current_user.id %}
+                            <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full ml-2">You</span>
+                        {% endif %}
+                    </h3>
+                    <p class="text-gray-400 text-sm">@{{ user.username }}</p>
+                    <div class="flex items-center mt-2 space-x-4 text-sm">
+                        <span class="flex items-center"><i class="fas fa-star text-yellow-400 mr-1"></i> {{ "%.1f"|format(user.average_rating) }}</span>
+                        <span class="flex items-center"><i class="fas fa-certificate text-purple-400 mr-1"></i> {{ user.achievement_title }}</span>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <p class="text-2xl font-bold gradient-text">{{ user.total_credits_earned }}</p>
+                    <p class="text-gray-400 text-sm">credits earned</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if not top_users %}
+        <div class="text-center py-16">
+            <i class="fas fa-trophy text-6xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">No rankings yet</h3>
+            <p class="text-gray-400">Be the first to earn credits!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

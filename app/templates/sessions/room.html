@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Video Session - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-black">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('sessions.my_sessions') }}" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold">Session with {{ other_user.first_name }}</h1>
+                    <p class="text-gray-400 text-sm">{{ session.provider_skill.name if session.requester_id == current_user.id else session.requester_skill.name }}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-2xl font-bold gradient-text" id="timer">00:00:00</p>
+                <p class="text-gray-400 text-sm">{{ session.duration_minutes }} min session</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="relative">
+        <div id="local-video" class="w-full h-[60vh] md:h-[70vh] bg-gray-900 flex items-center justify-center">
+            <div class="text-center">
+                <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user text-4xl text-gray-600"></i>
+                </div>
+                <p class="text-gray-400">Connecting...</p>
+            </div>
+        </div>
+        
+        <div id="remote-video" class="absolute top-4 right-4 w-32 h-24 md:w-48 md:h-36 bg-gray-800 rounded-xl overflow-hidden shadow-lg">
+            <div class="w-full h-full flex items-center justify-center">
+                <i class="fas fa-user text-gray-600 text-2xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-lg py-4">
+        <div class="max-w-7xl mx-auto px-4 flex items-center justify-center space-x-4">
+            <button id="toggle-mic" class="w-14 h-14 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-all">
+                <i class="fas fa-microphone text-xl"></i>
+            </button>
+            
+            <button id="toggle-camera" class="w-14 h-14 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-all">
+                <i class="fas fa-video text-xl"></i>
+            </button>
+            
+            <button id="leave-call" class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-500 flex items-center justify-center transition-all">
+                <i class="fas fa-phone-slash text-xl"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.agora.io/sdk/release/AgoraRTC_N.js"></script>
+<script>
+const APP_ID = "{{ agora_app_id }}";
+const TOKEN = "{{ agora_token }}";
+const CHANNEL = "{{ channel }}";
+const UID = {{ uid }};
+
+let client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+let localTracks = { video: null, audio: null };
+let isMuted = false;
+let isVideoOff = false;
+
+client.init(APP_ID, () => {
+    console.log('Client initialized');
+    joinChannel();
+}, (err) => {
+    console.error('Initialization error:', err);
+    alert('Failed to initialize video call. Please refresh and try again.');
+});
+
+function joinChannel() {
+    client.join(APP_ID, CHANNEL, TOKEN, UID, (uid) => {
+        console.log('Joined channel:', uid);
+        createLocalTracks();
+        startTimer();
+    }, (err) => {
+        console.error('Join channel error:', err);
+    });
+}
+
+async function createLocalTracks() {
+    try {
+        localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
+        const localVideoElement = document.getElementById('local-video');
+        localVideoElement.innerHTML = '';
+        localVideoElement.appendChild(localTracks.videoTrack.play());
+        
+        client.publish(localTracks);
+    } catch (err) {
+        console.error('Create tracks error:', err);
+    }
+}
+
+client.on('user-published', (user, mediaType) => {
+    client.subscribe(user, mediaType, () => {
+        if (mediaType === 'video') {
+            const remoteVideoElement = document.getElementById('remote-video');
+            remoteVideoElement.innerHTML = '';
+            remoteVideoElement.appendChild(user.videoTrack.play());
+        }
+        if (mediaType === 'audio') {
+            user.audioTrack.play();
+        }
+    });
+});
+
+client.on('user-left', (user) => {
+    const remoteVideoElement = document.getElementById('remote-video');
+    remoteVideoElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><i class="fas fa-user text-gray-600 text-2xl"></i></div>';
+});
+
+document.getElementById('toggle-mic').addEventListener('click', () => {
+    isMuted = !isMuted;
+    if (localTracks.audio) {
+        isMuted ? localTracks.audio.setEnabled(false) : localTracks.audio.setEnabled(true);
+    }
+    document.getElementById('toggle-mic').classList.toggle('bg-red-600', isMuted);
+    document.getElementById('toggle-mic').innerHTML = isMuted ? '<i class="fas fa-microphone-slash text-xl"></i>' : '<i class="fas fa-microphone text-xl"></i>';
+});
+
+document.getElementById('toggle-camera').addEventListener('click', () => {
+    isVideoOff = !isVideoOff;
+    if (localTracks.video) {
+        isVideoOff ? localTracks.video.setEnabled(false) : localTracks.video.setEnabled(true);
+    }
+    document.getElementById('toggle-camera').classList.toggle('bg-red-600', isVideoOff);
+    document.getElementById('toggle-camera').innerHTML = isVideoOff ? '<i class="fas fa-video-slash text-xl"></i>' : '<i class="fas fa-video text-xl"></i>';
+});
+
+document.getElementById('leave-call').addEventListener('click', () => {
+    if (confirm('Are you sure you want to leave the session?')) {
+        leaveChannel();
+    }
+});
+
+async function leaveChannel() {
+    if (localTracks.video) localTracks.video.stop();
+    if (localTracks.audio) localTracks.audio.stop();
+    client.leave(() => {
+        window.location.href = "{{ url_for('sessions.my_sessions') }}";
+    }, (err) => {
+        console.error('Leave error:', err);
+        window.location.href = "{{ url_for('sessions.my_sessions') }}";
+    });
+}
+
+let seconds = 0;
+function startTimer() {
+    setInterval(() => {
+        seconds++;
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        document.getElementById('timer').textContent = 
+            `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="glass-card p-8 text-center">
+        <div class="mb-8">
+            <i class="fas fa-certificate text-6xl gradient-text"></i>
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-4">Certificate of Achievement</h1>
+        <p class="text-gray-400 mb-8">This is to certify that</p>
+        
+        <h2 class="text-2xl font-bold gradient-text mb-4">{{ current_user.full_name }}</h2>
+        
+        <p class="text-gray-300 mb-6">has successfully reached <span class="font-bold text-yellow-400">{{ certificate.credits_at_achievement }} credits</span> and achieved the title of</p>
+        
+        <h3 class="text-xl font-bold text-yellow-400 mb-8">{{ certificate.title }}</h3>
+        
+        <div class="border-t border-white/10 pt-6">
+            <div class="flex justify-center space-x-8 text-sm text-gray-400">
+                <div>
+                    <p class="text-xs">Certificate Code</p>
+                    <p class="font-mono">{{ certificate.certificate_code }}</p>
+                </div>
+                <div>
+                    <p class="text-xs">Date Issued</p>
+                    <p>{{ certificate.issued_at.strftime('%B %d, %Y') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 flex justify-center space-x-4">
+            <button onclick="window.print()" class="btn-gradient px-6 py-3 rounded-xl font-medium">
+                <i class="fas fa-print mr-2"></i>Print
+            </button>
+            <a href="{{ url_for('profile.certificates') }}" class="glass px-6 py-3 rounded-xl font-medium hover:bg-white/10">
+                <i class="fas fa-arrow-left mr-2"></i>Back
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

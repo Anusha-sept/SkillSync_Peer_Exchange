@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Set Availability - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Progress Header -->
+    <div class="glass-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold">📅 Set Your Availability</h1>
+                <p class="text-gray-400 mt-1">Let others know when you're available for skill exchanges</p>
+            </div>
+            <div class="text-right">
+                <span class="px-3 py-1 rounded-full text-sm bg-emerald-500/20 text-emerald-400">
+                    <i class="fas fa-check-circle mr-1"></i>Step 2 of 2
+                </span>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-700 rounded-full h-2">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" style="width: 100%"></div>
+        </div>
+        
+        <div class="flex justify-between mt-2 text-xs text-gray-400">
+            <span>Profile & Skills</span>
+            <span class="text-indigo-400">Availability</span>
+        </div>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 p-4 rounded-xl border border-emerald-500/30 mb-6">
+        <div class="flex items-start">
+            <i class="fas fa-lightbulb text-emerald-400 text-xl mt-0.5"></i>
+            <div class="ml-3">
+                <p class="text-sm text-emerald-300">
+                    <strong>Important:</strong> Only users with availability set appear in AI matches and can be booked for sessions!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-card p-8">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <!-- Timezone Selection -->
+            <div class="mb-8">
+                <label class="block text-sm font-medium mb-3">
+                    <i class="fas fa-globe mr-2 text-indigo-400"></i>Your Timezone
+                </label>
+                <select name="timezone" class="input-field w-full px-4 py-3 rounded-xl">
+                    <option value="">Select your timezone</option>
+                    <optgroup label="Asia">
+                        <option value="Asia/Kolkata" {% if selected_timezone == 'Asia/Kolkata' %}selected{% endif %}>🇮🇳 India (IST)</option>
+                        <option value="Asia/Singapore" {% if selected_timezone == 'Asia/Singapore' %}selected{% endif %}>🇸🇬 Singapore (SGT)</option>
+                        <option value="Asia/Dubai" {% if selected_timezone == 'Asia/Dubai' %}selected{% endif %}>🇦🇪 Dubai (GST)</option>
+                        <option value="Asia/Tokyo" {% if selected_timezone == 'Asia/Tokyo' %}selected{% endif %}>🇯🇵 Tokyo (JST)</option>
+                        <option value="Asia/Shanghai" {% if selected_timezone == 'Asia/Shanghai' %}selected{% endif %}>🇨🇳 Shanghai (CST)</option>
+                    </optgroup>
+                    <optgroup label="Europe">
+                        <option value="Europe/London" {% if selected_timezone == 'Europe/London' %}selected{% endif %}>🇬🇧 London (GMT)</option>
+                        <option value="Europe/Paris" {% if selected_timezone == 'Europe/Paris' %}selected{% endif %}>🇫🇷 Paris (CET)</option>
+                        <option value="Europe/Berlin" {% if selected_timezone == 'Europe/Berlin' %}selected{% endif %}>🇩🇪 Berlin (CET)</option>
+                    </optgroup>
+                    <optgroup label="Americas">
+                        <option value="America/New_York" {% if selected_timezone == 'America/New_York' %}selected{% endif %}>🇺🇸 Eastern Time (ET)</option>
+                        <option value="America/Chicago" {% if selected_timezone == 'America/Chicago' %}selected{% endif %}>🇺🇸 Central Time (CT)</option>
+                        <option value="America/Denver" {% if selected_timezone == 'America/Denver' %}selected{% endif %}>🇺🇸 Mountain Time (MT)</option>
+                        <option value="America/Los_Angeles" {% if selected_timezone == 'America/Los_Angeles' %}selected{% endif %}>🇺🇸 Pacific Time (PT)</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                        <option value="UTC" {% if selected_timezone == 'UTC' %}selected{% endif %}>🌍 UTC</option>
+                        <option value="Australia/Sydney" {% if selected_timezone == 'Australia/Sydney' %}selected{% endif %}>🇦🇺 Sydney (AEST)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <!-- Weekly Schedule -->
+            <div class="mb-8">
+                <label class="block text-sm font-medium mb-4">
+                    <i class="fas fa-calendar-week mr-2 text-indigo-400"></i>Weekly Schedule
+                </label>
+                
+                <div class="space-y-3">
+                    {% for day in days %}
+                    <div class="day-card glass p-4 rounded-xl transition-all duration-300
+                                {% if availability.get(loop.index0) %}border-2 border-emerald-500 bg-emerald-500/10{% endif %}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg {% if availability.get(loop.index0) %}bg-emerald-500/30{% else %}bg-indigo-500/20{% endif %} flex items-center justify-center">
+                                    <span class="{% if availability.get(loop.index0) %}text-emerald-400{% else %}text-indigo-400{% endif %} text-sm font-bold">{{ loop.index }}</span>
+                                </div>
+                                <span class="font-medium">{{ day }}</span>
+                            </div>
+                            
+                            <label class="flex items-center cursor-pointer">
+                                <span class="mr-3 text-sm text-gray-400">Available</span>
+                                <input type="checkbox" name="available_{{ loop.index0 }}" 
+                                       class="toggle-day w-5 h-5 rounded border-gray-500 text-emerald-500 focus:ring-emerald-500 bg-transparent"
+                                       {% if availability.get(loop.index0) %}checked{% endif %}
+                                       onchange="toggleDayTime(this, {{ loop.index0 }})">
+                            </label>
+                        </div>
+                        
+                        <!-- Time Slots (shown when available) -->
+                        <div class="time-slots mt-4 pt-4 border-t border-gray-700 
+                                    {% if not availability.get(loop.index0) %}hidden{% endif %}" 
+                             id="time_slots_{{ loop.index0 }}">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">Start Time</label>
+                                    <input type="time" name="start_{{ loop.index0 }}" 
+                                           value="{{ availability.get(loop.index0, {}).get('start', '09:00') }}"
+                                           class="input-field w-full px-3 py-2 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-2">End Time</label>
+                                    <input type="time" name="end_{{ loop.index0 }}" 
+                                           value="{{ availability.get(loop.index0, {}).get('end', '17:00') }}"
+                                           class="input-field w-full px-3 py-2 rounded-lg text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="mb-8">
+                <label class="block text-sm font-medium mb-3">Quick Presets</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button type="button" class="preset-btn glass p-3 rounded-xl text-center hover:bg-white/10 transition-all hover:scale-105" 
+                            data-start="09:00" data-end="17:00" onclick="applyPreset('09:00', '17:00')">
+                        <span class="block text-sm">🌅 Morning</span>
+                        <span class="text-xs text-gray-400">9AM - 5PM</span>
+                    </button>
+                    <button type="button" class="preset-btn glass p-3 rounded-xl text-center hover:bg-white/10 transition-all hover:scale-105" 
+                            data-start="12:00" data-end="20:00" onclick="applyPreset('12:00', '20:00')">
+                        <span class="block text-sm">🌆 Afternoon</span>
+                        <span class="text-xs text-gray-400">12PM - 8PM</span>
+                    </button>
+                    <button type="button" class="preset-btn glass p-3 rounded-xl text-center hover:bg-white/10 transition-all hover:scale-105" 
+                            data-start="18:00" data-end="22:00" onclick="applyPreset('18:00', '22:00')">
+                        <span class="block text-sm">🌙 Evening</span>
+                        <span class="text-xs text-gray-400">6PM - 10PM</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-300">Your availability will be visible to:</p>
+                        <p class="text-xs text-gray-400 mt-1">• AI Match suggestions • Exchange partners • Booking system</p>
+                    </div>
+                    <i class="fas fa-eye text-indigo-400 text-2xl"></i>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex space-x-4">
+                <a href="{{ url_for('profile.edit') }}" class="flex-1 glass px-4 py-3 rounded-xl text-center hover:bg-white/10 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </a>
+                <button type="submit" class="flex-1 btn-gradient px-4 py-3 rounded-xl font-semibold">
+                    <i class="fas fa-check mr-2"></i>Complete Setup
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tip -->
+    <div class="mt-6 p-4 bg-gray-800/50 rounded-xl">
+        <p class="text-sm text-gray-400 text-center">
+            <i class="fas fa-info-circle mr-2 text-yellow-400"></i>
+            Tip: You can update your availability anytime from profile settings
+        </p>
+    </div>
+</div>
+
+<script>
+function toggleDayTime(checkbox, dayIndex) {
+    const timeSlots = document.getElementById('time_slots_' + dayIndex);
+    const dayCard = checkbox.closest('.day-card');
+    const iconDiv = dayCard.querySelector('.w-8.h-8');
+    const iconSpan = dayCard.querySelector('.w-8.h-8 span');
+    
+    if (checkbox.checked) {
+        timeSlots.classList.remove('hidden');
+        dayCard.classList.add('border-emerald-500', 'bg-emerald-500/10');
+        iconDiv.classList.remove('bg-indigo-500/20');
+        iconDiv.classList.add('bg-emerald-500/30');
+        iconSpan.classList.remove('text-indigo-400');
+        iconSpan.classList.add('text-emerald-400');
+    } else {
+        timeSlots.classList.add('hidden');
+        dayCard.classList.remove('border-emerald-500', 'bg-emerald-500/10');
+        iconDiv.classList.remove('bg-emerald-500/30');
+        iconDiv.classList.add('bg-indigo-500/20');
+        iconSpan.classList.remove('text-emerald-400');
+        iconSpan.classList.add('text-indigo-400');
+    }
+}
+
+function applyPreset(startTime, endTime) {
+    // Check all checkboxes and set times
+    for (let i = 0; i < 7; i++) {
+        const checkbox = document.querySelector('input[name="available_' + i + '"]');
+        if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change'));
+            
+            // Set times
+            const startInput = document.querySelector('input[name="start_' + i + '"]');
+            const endInput = document.querySelector('input[name="end_' + i + '"]');
+            if (startInput) startInput.value = startTime;
+            if (endInput) endInput.value = endTime;
+        }
+    }
+}
+
+// Initialize on load - set default times if not set
+document.addEventListener('DOMContentLoaded', function() {
+    for (let i = 0; i < 7; i++) {
+        const checkbox = document.querySelector('input[name="available_' + i + '"]');
+        if (checkbox && checkbox.checked) {
+            const timeSlots = document.getElementById('time_slots_' + i);
+            timeSlots.classList.remove('hidden');
+        }
+    }
+});
+</script>
+
+<style>
+.day-card {
+    transition: all 0.3s ease;
+}
+.preset-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+</style>
+{% endblock %}

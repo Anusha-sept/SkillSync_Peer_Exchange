@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: skillsync-nexus
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 "app:create_app()"
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_6ydDFUA1aXmt@ep-dawn-leaf-aoyap1z6-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      - key: SECRET_KEY
+        value: 9658486e6fd4d8d00fa2dfd6df6dd3a9a479d0ec0564871f4dee941e96b21c1f
+      - key: EMAIL_USER
+        value: chalagerianusha4@gmail.com
+      - key: EMAIL_PASSWORD
+        value: kotu fkgc ftbd kaxw
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: AGORA_APP_ID
+        value: a4a03487d76d4a6c861bdab7c704d58b
+      - key: AGORA_APP_CERTIFICATE
+        value: f5b406d1f4d446d6a759c5818008ebc3
+      - key: FLASK_ENV
+        value: production

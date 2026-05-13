@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction History - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold">Transaction History</h1>
+        <a href="{{ url_for('wallet.index') }}" class="text-indigo-400 hover:text-indigo-300">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Wallet
+        </a>
+    </div>
+    
+    {% if transactions %}
+        <div class="space-y-3">
+            {% for txn in transactions %}
+                <div class="glass-card p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full {% if txn.amount > 0 %}bg-emerald-500/20 flex items-center justify-center{% else %}bg-red-500/20 flex items-center justify-center{% endif %}">
+                            <i class="fas {% if txn.amount > 0 %}fa-arrow-up text-emerald-400{% else %}fa-arrow-down text-red-400{% endif %}"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium">{{ txn.description }}</p>
+                            <p class="text-gray-500 text-sm">{{ txn.created_at.strftime('%B %d, %Y at %H:%M') }}</p>
+                            <span class="text-xs px-2 py-1 rounded-full {% if txn.transaction_type == 'deposit' %}bg-emerald-500/20 text-emerald-400{% elif txn.transaction_type == 'session_earned' %}bg-purple-500/20 text-purple-400{% elif txn.transaction_type == 'session_spent' %}bg-orange-500/20 text-orange-400{% else %}bg-gray-500/20 text-gray-400{% endif %}">
+                                {{ txn.transaction_type|replace('_', ' ')|title }}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="text-2xl font-bold {% if txn.amount > 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+                        {{ '+' if txn.amount > 0 else '' }}{{ txn.amount }}
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-16">
+            <i class="fas fa-receipt text-6xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">No transactions</h3>
+            <p class="text-gray-400">Your transaction history will appear here</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

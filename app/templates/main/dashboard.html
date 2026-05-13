@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">Welcome back, {{ current_user.first_name }}! 👋</h1>
+        <p class="text-gray-400 mt-2">Here's what's happening with your skill exchange journey</p>
+    </div>
+    
+    <div class="grid lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                    <i class="fas fa-coins text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text">{{ current_user.credits }}</span>
+            </div>
+            <h3 class="text-gray-400 text-sm">Your Credits</h3>
+            <a href="{{ url_for('wallet.add_credits') }}" class="text-indigo-400 text-sm hover:text-indigo-300 mt-2 inline-block">+ Add more</a>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                    <i class="fas fa-star text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text">{{ "%.1f"|format(stats.average_rating) }}</span>
+            </div>
+            <h3 class="text-gray-400 text-sm">Average Rating</h3>
+            <div class="flex text-yellow-400 text-sm mt-2">
+                {% for i in range(5) %}
+                    <i class="fas fa-star{% if i < stats.average_rating|int %}{% else %}-half-alt{% endif %}"></i>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text">{{ stats.total_sessions }}</span>
+            </div>
+            <h3 class="text-gray-400 text-sm">Sessions Completed</h3>
+            <a href="{{ url_for('sessions.history') }}" class="text-indigo-400 text-sm hover:text-indigo-300 mt-2 inline-block">View history</a>
+        </div>
+        
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                    <i class="fas fa-certificate text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text">{{ stats.certificates_count }}</span>
+            </div>
+            <h3 class="text-gray-400 text-sm">Certificates</h3>
+            <a href="{{ url_for('profile.certificates') }}" class="text-indigo-400 text-sm hover:text-indigo-300 mt-2 inline-block">View all</a>
+        </div>
+    </div>
+    
+    <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold"><i class="fas fa-calendar-alt mr-2 text-indigo-400"></i>Upcoming Sessions</h2>
+                    <a href="{{ url_for('sessions.my_sessions') }}" class="text-indigo-400 text-sm hover:text-indigo-300">View all</a>
+                </div>
+                
+                {% if upcoming_sessions %}
+                    <div class="space-y-4">
+                        {% for session in upcoming_sessions %}
+                            <div class="glass p-4 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <img src="{{ url_for('static', filename='uploads/' + (session.provider.avatar if session.requester_id == current_user.id else session.requester.avatar)) }}" class="w-12 h-12 rounded-full object-cover">
+                                    <div>
+                                        <p class="font-semibold">{{ session.provider.first_name if session.requester_id == current_user.id else session.requester.first_name }}</p>
+                                        <p class="text-sm text-gray-400">{{ session.provider_skill.name if session.requester_id == current_user.id else session.requester_skill.name }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm">{{ session.scheduled_start.strftime('%b %d') }}</p>
+                                    <p class="text-sm text-gray-400">{{ session.scheduled_start.strftime('%H:%M') }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-calendar-times text-4xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400">No upcoming sessions</p>
+                        <a href="{{ url_for('main.matches') }}" class="text-indigo-400 hover:text-indigo-300 mt-2 inline-block">Find a match</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold"><i class="fas fa-bell mr-2 text-pink-400"></i>Recent Activity</h2>
+                    <a href="{{ url_for('main.notifications') }}" class="text-indigo-400 text-sm hover:text-indigo-300">View all</a>
+                </div>
+                
+                {% if recent_notifications %}
+                    <div class="space-y-3">
+                        {% for notif in recent_notifications %}
+                            <a href="{{ url_for('main.mark_notification_read', notification_id=notif.id) }}" class="block glass p-4 rounded-xl hover:bg-white/5 {% if not notif.is_read %}border-l-4 border-indigo-500{% endif %}">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium">{{ notif.title }}</p>
+                                        <p class="text-sm text-gray-400">{{ notif.message }}</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500">{{ notif.created_at.strftime('%H:%M') }}</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-bell-slash text-4xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400">No recent notifications</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4"><i class="fas fa-exchange-alt mr-2 text-emerald-400"></i>Pending Requests</h2>
+                
+                {% if pending_requests %}
+                    <div class="space-y-3">
+                        {% for session in pending_requests %}
+                            <div class="glass p-4 rounded-xl">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <img src="{{ url_for('static', filename='uploads/' + session.requester.avatar) }}" class="w-10 h-10 rounded-full object-cover">
+                                    <div>
+                                        <p class="font-medium">{{ session.requester.first_name }}</p>
+                                        <p class="text-xs text-gray-400">{{ session.requester_skill.name }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('sessions.accept_request', session_id=session.id) }}" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-center py-2 rounded-lg text-sm font-medium">Accept</a>
+                                    <a href="{{ url_for('sessions.reject_request', session_id=session.id) }}" class="flex-1 bg-red-500 hover:bg-red-600 text-center py-2 rounded-lg text-sm font-medium">Decline</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-400 text-center py-4">No pending requests</p>
+                {% endif %}
+                
+                <a href="{{ url_for('sessions.requests') }}" class="block text-center text-indigo-400 text-sm mt-4 hover:text-indigo-300">View all requests</a>
+            </div>
+            
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4"><i class="fas fa-wallet mr-2 text-amber-400"></i>Recent Transactions</h2>
+                
+                {% if recent_transactions %}
+                    <div class="space-y-3">
+                        {% for txn in recent_transactions %}
+                            <div class="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                                <div>
+                                    <p class="text-sm">{{ txn.description }}</p>
+                                    <p class="text-xs text-gray-500">{{ txn.created_at.strftime('%b %d') }}</p>
+                                </div>
+                                <span class="font-semibold {% if txn.amount > 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+                                    {{ '+' if txn.amount > 0 else '' }}{{ txn.amount }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-400 text-center py-4">No transactions yet</p>
+                {% endif %}
+                
+                <a href="{{ url_for('wallet.history') }}" class="block text-center text-indigo-400 text-sm mt-4 hover:text-indigo-300">View all</a>
+            </div>
+            
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{{ url_for('main.matches') }}" class="glass p-4 rounded-xl text-center hover:bg-white/10">
+                        <i class="fas fa-magic text-2xl text-indigo-400 mb-2"></i>
+                        <p class="text-sm">Find Matches</p>
+                    </a>
+                    <a href="{{ url_for('profile.edit') }}" class="glass p-4 rounded-xl text-center hover:bg-white/10">
+                        <i class="fas fa-user-edit text-2xl text-pink-400 mb-2"></i>
+                        <p class="text-sm">Edit Profile</p>
+                    </a>
+                    <a href="{{ url_for('wallet.add_credits') }}" class="glass p-4 rounded-xl text-center hover:bg-white/10">
+                        <i class="fas fa-plus-circle text-2xl text-emerald-400 mb-2"></i>
+                        <p class="text-sm">Add Credits</p>
+                    </a>
+                    <a href="{{ url_for('main.leaderboard') }}" class="glass p-4 rounded-xl text-center hover:bg-white/10">
+                        <i class="fas fa-trophy text-2xl text-amber-400 mb-2"></p>
+                        <p class="text-sm">Leaderboard</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

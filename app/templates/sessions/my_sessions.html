@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}My Sessions - SkillSync Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">My Sessions</h1>
+    
+    <div class="space-y-8">
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-6 flex items-center">
+                <i class="fas fa-calendar-check text-emerald-400 mr-2"></i>Upcoming Sessions
+            </h2>
+            
+            {% if upcoming %}
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for session in upcoming %}
+                        <div class="session-card glass p-5 rounded-xl">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <img src="{{ url_for('static', filename='uploads/' + (session.provider.avatar if session.requester_id == current_user.id else session.requester.avatar)) }}" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-semibold">{{ session.provider.first_name if session.requester_id == current_user.id else session.requester.first_name }}</h3>
+                                    <p class="text-sm text-gray-400">{{ session.provider_skill.name if session.requester_id == current_user.id else session.requester_skill.name }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm mb-4">
+                                <div class="flex items-center text-gray-400">
+                                    <i class="fas fa-calendar mr-2 w-5"></i>
+                                    {{ session.scheduled_start.strftime('%B %d, %Y') }}
+                                </div>
+                                <div class="flex items-center text-gray-400">
+                                    <i class="fas fa-clock mr-2 w-5"></i>
+                                    {{ session.scheduled_start.strftime('%H:%M') }} - {{ session.scheduled_end.strftime('%H:%M') }}
+                                </div>
+                                <div class="flex items-center text-indigo-400">
+                                    <i class="fas fa-coins mr-2 w-5"></i>
+                                    {{ session.credits_amount }} credits
+                                </div>
+                            </div>
+                            
+                            <a href="{{ url_for('sessions.room', session_id=session.id) }}" class="btn-gradient w-full py-2 rounded-lg text-center font-medium block">
+                                <i class="fas fa-video mr-2"></i>Join Session
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-calendar-times text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-400">No upcoming sessions</p>
+                    <a href="{{ url_for('main.matches') }}" class="text-indigo-400 hover:text-indigo-300 mt-2 inline-block">Find a match</a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-6 flex items-center">
+                <i class="fas fa-clock text-yellow-400 mr-2"></i>Pending Requests
+            </h2>
+            
+            {% if pending %}
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for session in pending %}
+                        <div class="glass p-5 rounded-xl">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <img src="{{ url_for('static', filename='uploads/' + (session.provider.avatar if session.requester_id == current_user.id else session.requester.avatar)) }}" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-semibold">{{ session.provider.first_name if session.requester_id == current_user.id else session.requester.first_name }}</h3>
+                                    <p class="text-sm text-gray-400">{% if session.requester_id == current_user.id %}Waiting for response{% else %}Waiting for your response{% endif %}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm mb-4">
+                                <div class="flex items-center text-gray-400">
+                                    <i class="fas fa-exchange-alt mr-2 w-5"></i>
+                                    {{ session.requester_skill.name }} → {{ session.provider_skill.name }}
+                                </div>
+                                <div class="flex items-center text-gray-400">
+                                    <i class="fas fa-calendar mr-2 w-5"></i>
+                                    {{ session.scheduled_start.strftime('%b %d, %H:%M') }}
+                                </div>
+                            </div>
+                            
+                            <span class="px-3 py-1 rounded-full text-sm bg-yellow-500/20 text-yellow-400">
+                                {{ session.status }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-check-circle text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-400">No pending requests</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-6 flex items-center">
+                <i class="fas fa-history text-purple-400 mr-2"></i>Completed Sessions
+            </h2>
+            
+            {% if completed %}
+                <div class="space-y-4">
+                    {% for session in completed %}
+                        <div class="glass p-4 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <img src="{{ url_for('static', filename='uploads/' + (session.provider.avatar if session.requester_id == current_user.id else session.requester.avatar)) }}" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-semibold">{{ session.provider.first_name if session.requester_id == current_user.id else session.requester.first_name }}</h3>
+                                    <p class="text-sm text-gray-400">{{ session.provider_skill.name if session.requester_id == current_user.id else session.requester_skill.name }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <span class="text-emerald-400 font-semibold">+{{ session.credits_amount }} credits</span>
+                                <a href="{{ url_for('sessions.review', session_id=session.id) }}" class="px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 text-sm">
+                                    <i class="fas fa-star mr-1"></i>Review
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-history text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-400">No completed sessions yet</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
