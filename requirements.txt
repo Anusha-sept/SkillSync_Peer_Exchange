@@ -6,7 +6,7 @@ Flask-WTF==1.2.1
 Flask-Migrate==4.0.5
 Flask-Bcrypt==1.0.1
 SQLAlchemy==2.0.41
-psycopg2-binary==2.9.9
+psycopg[binary]==3.2.9
 gunicorn==21.2.0
 APScheduler==3.10.4
 python-dotenv==1.0.0

@@ -7,6 +7,8 @@ class Config:
     # Use SQLite for local development, PostgreSQL for production
     db_url = os.environ.get('DATABASE_URL')
     if db_url:
+        if db_url.startswith('postgresql://') and '+psycopg' not in db_url:
+            db_url = db_url.replace('postgresql://', 'postgresql+psycopg://', 1)
         SQLALCHEMY_DATABASE_URI = db_url
     else:
         # Fallback to SQLite for local testing
