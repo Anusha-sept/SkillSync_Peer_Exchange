@@ -34,8 +34,8 @@ class Config:
     MAIL_PORT = int(os.environ.get('EMAIL_PORT') or 587)
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('EMAIL_USER') or 'chalagerianusha4@gmail.com'
-    MAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD') or 'kotu fkgc ftbd kaxw'
-    MAIL_DEFAULT_SENDER = ('SkillSync Nexus', 'chalagerianusha4@gmail.com')
+    MAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD') or 'kotufkgcftbdkaxw'
+    MAIL_DEFAULT_SENDER = ('SkillSync Peer Exchange', 'chalagerianusha4@gmail.com')
     
     # Agora Config
     AGORA_APP_ID = os.environ.get('AGORA_APP_ID') or 'a4a03487d76d4a6c861bdab7c704d58b'
