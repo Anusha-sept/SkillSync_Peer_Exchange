@@ -21,7 +21,8 @@ from app.utils.helpers import (
     profile_required,
     check_booking_conflicts,
     get_user_busy_slots,
-    get_common_availability
+    get_common_availability,
+    get_user_availability
 )
 
 sessions_bp = Blueprint("sessions", __name__)
