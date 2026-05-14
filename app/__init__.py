@@ -21,13 +21,18 @@ logger = logging.getLogger(__name__)
 
 
 def ensure_schema_updates():
-    inspector = db.inspect(db.engine)
-    user_columns = {column['name'] for column in inspector.get_columns('users')}
-    with db.engine.begin() as connection:
-        if 'timezone' not in user_columns:
-            connection.exec_driver_sql("ALTER TABLE users ADD COLUMN timezone VARCHAR(100) DEFAULT 'UTC'")
-        if 'profile_completed' not in user_columns:
-            connection.exec_driver_sql("ALTER TABLE users ADD COLUMN profile_completed BOOLEAN DEFAULT FALSE")
+    try:
+        inspector = db.inspect(db.engine)
+        user_columns = {column['name'] for column in inspector.get_columns('users')}
+        with db.engine.begin() as connection:
+            if 'timezone' not in user_columns:
+                connection.exec_driver_sql("ALTER TABLE users ADD COLUMN timezone VARCHAR(100) DEFAULT 'UTC'")
+                logger.info("Added timezone column to users table")
+            if 'profile_completed' not in user_columns:
+                connection.exec_driver_sql("ALTER TABLE users ADD COLUMN profile_completed BOOLEAN DEFAULT FALSE")
+                logger.info("Added profile_completed column to users table")
+    except Exception as e:
+        logger.warning(f"Schema update check failed (may already exist): {e}")
 
 
 @login_manager.user_loader
