@@ -41,6 +41,8 @@ def create_request(user_id):
 
     provider = User.query.get_or_404(user_id)
 
+    user_availability = get_user_availability(current_user.id)
+    provider_availability = get_user_availability(provider.id)
     common_slots = get_common_availability(current_user, provider)
     provider_busy = get_user_busy_slots(provider.id, datetime.utcnow().date())
     user_busy = get_user_busy_slots(current_user.id, datetime.utcnow().date())
@@ -121,7 +123,9 @@ def create_request(user_id):
         min_date=min_date,
         provider_busy=provider_busy,
         user_busy=user_busy,
-        common_slots=common_slots
+        common_slots=common_slots,
+        user_availability=user_availability,
+        provider_availability=provider_availability
     )
 
 
