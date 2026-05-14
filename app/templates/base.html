@@ -81,6 +81,11 @@ NAVBAR
         <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}"
              class="w-9 h-9 rounded-full">
 
+        <a href="{{ url_for('auth.logout') }}"
+           class="text-gray-400 hover:text-white text-sm px-3 py-1 rounded-lg hover:bg-white/10 transition-all">
+            Logout
+        </a>
+
     </div>
 
 </nav>
