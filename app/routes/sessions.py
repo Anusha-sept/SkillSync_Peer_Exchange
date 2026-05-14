@@ -137,3 +137,60 @@ def my_sessions():
     ).order_by(Session.scheduled_start.desc()).all()
 
     return render_template("sessions/my_sessions.html", sessions=sessions)
+
+
+# =====================================================
+# REQUESTS
+# =====================================================
+@sessions_bp.route("/requests")
+@login_required
+def requests():
+    pending = Session.query.filter(
+        Session.provider_id == current_user.id,
+        Session.status == 'pending'
+    ).order_by(Session.created_at.desc()).all()
+    return render_template("sessions/requests.html", sessions=pending)
+
+
+# =====================================================
+# ACCEPT REQUEST
+# =====================================================
+@sessions_bp.route("/accept/<int:session_id>")
+@login_required
+def accept_request(session_id):
+    session = Session.query.get_or_404(session_id)
+    if session.provider_id != current_user.id:
+        flash("Unauthorized", "danger")
+        return redirect(url_for("sessions.my_sessions"))
+    if session.status != 'pending':
+        flash("Request already processed", "warning")
+        return redirect(url_for("sessions.requests"))
+    session.status = 'accepted'
+    db.session.commit()
+    from app.utils.email import send_session_accepted_email, create_notification
+    send_session_accepted_email(session)
+    create_notification(session.requester, "Request Accepted", f"{current_user.first_name} accepted your request", "session_accepted", f"/sessions/room/{session.id}")
+    flash("Request accepted!", "success")
+    return redirect(url_for("sessions.requests"))
+
+
+# =====================================================
+# REJECT REQUEST
+# =====================================================
+@sessions_bp.route("/reject/<int:session_id>")
+@login_required
+def reject_request(session_id):
+    session = Session.query.get_or_404(session_id)
+    if session.provider_id != current_user.id:
+        flash("Unauthorized", "danger")
+        return redirect(url_for("sessions.my_sessions"))
+    if session.status != 'pending':
+        flash("Request already processed", "warning")
+        return redirect(url_for("sessions.requests"))
+    session.status = 'rejected'
+    db.session.commit()
+    from app.utils.email import send_session_rejected_email, create_notification
+    send_session_rejected_email(session)
+    create_notification(session.requester, "Request Declined", f"{current_user.first_name} declined your request", "session_rejected", "/sessions/my")
+    flash("Request declined", "info")
+    return redirect(url_for("sessions.requests"))
